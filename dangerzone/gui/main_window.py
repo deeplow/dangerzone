@@ -157,17 +157,13 @@ class WaitingWidget(QtWidgets.QWidget):
         state: Optional[str] = None
 
         # Can we find the container runtime binary binary
-        if platform.system() == "Linux":
-            container_runtime = shutil.which("podman")
-        else:
-            container_runtime = shutil.which("docker")
-
+        container_runtime = shutil.which("podman")
         if container_runtime is None:
-            log.error("Docker is not installed")
+            log.error("Podman is not installed")
             state = "not_installed"
 
         else:
-            # Can we run `docker image ls` without an error
+            # Can we run `podman image ls` without an error
             with subprocess.Popen(
                 [container_runtime, "image", "ls"],
                 stdout=subprocess.DEVNULL,
@@ -176,7 +172,7 @@ class WaitingWidget(QtWidgets.QWidget):
             ) as p:
                 p.communicate()
                 if p.returncode != 0:
-                    log.error("Docker is not running")
+                    log.error("Podman is not running")
                     state = "not_running"
                 else:
                     # Always try installing the container

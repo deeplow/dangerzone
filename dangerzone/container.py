@@ -9,13 +9,6 @@ from typing import Callable, List, Optional
 
 import appdirs
 
-# What container tech is used for this platform?
-if platform.system() == "Linux":
-    container_tech = "podman"
-else:
-    # Windows, Darwin, and unknown use docker for now, dangerzone-vm eventually
-    container_tech = "docker"
-
 # Define startupinfo for subprocesses
 if platform.system() == "Windows":
     startupinfo = subprocess.STARTUPINFO()  # type: ignore [attr-defined]
@@ -55,21 +48,13 @@ def exec_container(
     extra_args: List[str] = [],
     stdout_callback: Callable[[str], None] = None,
 ) -> int:
-    if container_tech == "podman":
-        container_runtime = shutil.which("podman")
-        if container_runtime is None:
-            raise Exception(f"podman is not installed")
+    container_runtime = shutil.which("podman")
+    if container_runtime is None:
+        raise Exception(f"podman is not installed")
 
-        platform_args = []
-        security_args = ["--security-opt", "no-new-privileges"]
-        security_args += ["--userns", "keep-id"]
-    else:
-        container_runtime = shutil.which("docker")
-        if container_runtime is None:
-            raise Exception(f"docker is not installed")
-
-        platform_args = ["--platform", "linux/amd64"]
-        security_args = ["--security-opt=no-new-privileges:true"]
+    platform_args = []
+    security_args = ["--security-opt", "no-new-privileges"]
+    security_args += ["--userns", "keep-id"]
 
     # drop all linux kernel capabilities
     security_args += ["--cap-drop", "all"]
