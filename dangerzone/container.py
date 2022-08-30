@@ -54,6 +54,7 @@ def exec_container(
 
     platform_args = []
     security_args = ["--security-opt", "no-new-privileges"]
+    security_args += ["--security-opt", "apparmor=containers-default"]
     security_args += ["--userns", "keep-id"]
 
     # drop all linux kernel capabilities

@@ -78,6 +78,11 @@ RUN apk -U upgrade && \
     tesseract-ocr-data-ukr \
     tesseract-ocr-data-vie
 
+# Install dependencies
+RUN apk add apparmor apparmor-utils
+RUN mkdir /etc/apparmor.d
+RUN touch /var/log/syslog
+
 # Install pdftk
 RUN \
     wget https://gitlab.com/pdftk-java/pdftk/-/jobs/924565145/artifacts/raw/build/libs/pdftk-all.jar && \
