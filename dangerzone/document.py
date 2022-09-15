@@ -7,7 +7,7 @@ from typing import Optional
 import appdirs
 
 
-class Common(object):
+class Document(object):
     """
     The Common class is a singleton of shared functionality throughout an open dangerzone window
     """
