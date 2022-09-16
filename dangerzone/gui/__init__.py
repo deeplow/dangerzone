@@ -10,7 +10,7 @@ import click
 import colorama
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from ..document import DocumentHolder
+from ..document import DocumentFilenameException, DocumentHolder
 from ..global_common import GlobalCommon
 from .common import GuiCommon
 from .main_window import MainWindow
@@ -87,30 +87,26 @@ def gui_main(filename: Optional[str]) -> bool:
 
     # Open a document in a window
     def new_window(input_file_path: Optional[str] = None) -> None:
-        document = DocumentHolder(input_file_path)
-        window_id = uuid.uuid4().hex
-        window = MainWindow(global_common, gui_common, window_id, document)
-        window.delete_window.connect(delete_window)
-        windows[window_id] = window
+        try:
+            document = DocumentHolder(input_file_path)
+            window_id = uuid.uuid4().hex
+            window = MainWindow(global_common, gui_common, window_id, document)
+            window.delete_window.connect(delete_window)
+            windows[window_id] = window
 
-        if input_file_path:
-            window.content_widget.doc_selection_widget.document_selected.emit()
+            if input_file_path:
+                window.content_widget.doc_selection_widget.document_selected.emit()
+
+        except DocumentFilenameException as e:
+            click.echo(e)
+            exit(1)
 
     # Open a new window if not filename is passed
     if filename is None:
         new_window()
     else:
         # If filename is passed as an argument, open it
-        # Validate filename
         input_file_path: str = os.path.abspath(os.path.expanduser(filename))
-        try:
-            open(input_file_path, "rb")
-        except FileNotFoundError:
-            click.echo("File not found")
-            return False
-        except PermissionError:
-            click.echo("Permission denied")
-            return False
 
         new_window(input_file_path)
 

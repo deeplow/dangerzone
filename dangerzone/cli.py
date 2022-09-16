@@ -9,7 +9,7 @@ from colorama import Back, Fore, Style
 
 from . import container
 from .container import convert
-from .document import DocumentHolder
+from .document import DocumentFilenameException, DocumentHolder
 from .global_common import GlobalCommon
 from .util import get_version
 
@@ -31,51 +31,23 @@ def cli_main(
 
     display_banner()
 
-    # Validate filename
-    valid = True
     try:
-        with open(os.path.abspath(filename), "rb") as f:
-            pass
-    except:
-        valid = False
-
-    if not valid:
-        click.echo("Invalid filename")
+        document = DocumentHolder(os.path.abspath(filename))
+    except DocumentFilenameException as e:
+        click.echo(str(e))
         exit(1)
 
-    document = DocumentHolder(os.path.abspath(filename))
-
     # Validate safe PDF output filename
-    if output_filename:
-        valid = True
-        if not output_filename.endswith(".pdf"):
-            click.echo("Safe PDF filename must end in '.pdf'")
-            exit(1)
-
-        try:
-            with open(os.path.abspath(output_filename), "wb"):
-                pass
-        except:
-            valid = False
-
-        if not valid:
-            click.echo("Safe PDF filename is not writable")
-            exit(1)
-
-        document.output_filename = os.path.abspath(output_filename)
-
-    else:
-        document.output_filename = (
-            f"{os.path.splitext(document.input_filename)[0]}-safe.pdf"
-        )
-        try:
-            with open(document.output_filename, "wb"):
-                pass
-        except:
-            click.echo(
-                f"Output filename {document.output_filename} is not writable, use --output-filename"
+    try:
+        if output_filename:
+            document.output_filename = os.path.abspath(output_filename)
+        else:
+            document.output_filename = (
+                f"{os.path.splitext(document.input_filename)[0]}-safe.pdf"
             )
-            exit(1)
+    except DocumentFilenameException as e:
+        click.echo(str(e))
+        exit(1)
 
     # Validate OCR language
     if ocr_lang:
