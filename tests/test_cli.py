@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
-import tempfile
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner, Result
@@ -62,12 +62,12 @@ class TestCliConversion(TestCliBasic):
         result = self.run_cli(f'"{doc}"')
         assert result.exit_code == 0
 
-    def test_output_filename(self):
-        temp_dir = tempfile.mkdtemp(prefix="dangerzone-")
+    def test_output_filename(self, tmp_path):
         result = self.run_cli(
-            f"{self.sample_doc} --output-filename {temp_dir}/safe.pdf"
+            f"{self.sample_doc} --output-filename {tmp_path}/safe.pdf"
         )
         assert result.exit_code == 0
+        assert "safe.pdf" in os.listdir(tmp_path)
 
     def test_output_filename_new_dir(self):
         result = self.run_cli(
@@ -90,10 +90,10 @@ class TestCliConversion(TestCliBasic):
             "Оригинал.pdf",
         ],
     )
-    def test_filenames(self, filename):
-        tempdir = tempfile.mkdtemp(prefix="dangerzone-")
-        doc_path = os.path.join(filename)
+    def test_filenames(self, filename, tmp_path):
+        doc_path = str(Path(tmp_path).joinpath(filename))
         shutil.copyfile(self.sample_doc, doc_path)
         result = self.run_cli(doc_path)
-        shutil.rmtree(tempdir)
+
         assert result.exit_code == 0
+        assert len(os.listdir(tmp_path)) == 2
