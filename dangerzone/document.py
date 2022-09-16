@@ -12,9 +12,9 @@ class Document(object):
     The Common class is a singleton of shared functionality throughout an open dangerzone window
     """
 
-    def __init__(self) -> None:
+    def __init__(self, input_file_path: str) -> None:
         # Name of input and out files
-        self._input_filename: Optional[str] = None
+        self._input_filename: Optional[str] = input_file_path
         self._output_filename: Optional[str] = None
 
     @property

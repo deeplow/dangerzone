@@ -10,6 +10,7 @@ import click
 import colorama
 from PySide2 import QtCore, QtGui, QtWidgets
 
+from ..document import Document
 from ..global_common import GlobalCommon
 from .common import GuiCommon
 from .main_window import MainWindow
@@ -85,50 +86,42 @@ def gui_main(filename: Optional[str]) -> bool:
         del windows[window_id]
 
     # Open a document in a window
-    def select_document(filename: Optional[str] = None) -> bool:
-        if (
-            len(windows) == 1
-            and windows[list(windows.keys())[0]].document.input_filename == None
-        ):
-            window = windows[list(windows.keys())[0]]
-        else:
-            window_id = uuid.uuid4().hex
-            window = MainWindow(global_common, gui_common, window_id)
-            window.delete_window.connect(delete_window)
-            windows[window_id] = window
+    def new_window(input_file_path: Optional[str] = None) -> None:
+        document = Document(input_file_path)
+        window_id = uuid.uuid4().hex
+        window = MainWindow(global_common, gui_common, window_id, document)
+        window.delete_window.connect(delete_window)
+        windows[window_id] = window
 
-        if filename:
-            # Validate filename
-            file_path: str = os.path.abspath(os.path.expanduser(filename))
-            try:
-                open(file_path, "rb")
-            except FileNotFoundError:
-                click.echo("File not found")
-                return False
-            except PermissionError:
-                click.echo("Permission denied")
-                return False
-            window.document.input_filename = file_path
+        if input_file_path:
             window.content_widget.doc_selection_widget.document_selected.emit()
-
-        return True
 
     # Open a new window if not filename is passed
     if filename is None:
-        select_document()
+        new_window()
     else:
         # If filename is passed as an argument, open it
-        if not select_document(filename):
-            return True
+        # Validate filename
+        input_file_path: str = os.path.abspath(os.path.expanduser(filename))
+        try:
+            open(input_file_path, "rb")
+        except FileNotFoundError:
+            click.echo("File not found")
+            return False
+        except PermissionError:
+            click.echo("Permission denied")
+            return False
+
+        new_window(input_file_path)
 
     # Open a new window, if all windows are closed
     def application_activated() -> None:
         if len(windows) == 0:
-            select_document()
+            new_window()
 
     # If we get a file open event, open it
-    app_wrapper.document_selected.connect(select_document)
-    app_wrapper.new_window.connect(select_document)
+    app_wrapper.document_selected.connect(new_window)
+    app_wrapper.new_window.connect(new_window)
 
     # If the application is activated and all windows are closed, open a new one
     app_wrapper.application_activated.connect(application_activated)
