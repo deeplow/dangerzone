@@ -10,7 +10,7 @@ import click
 import colorama
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from ..document import Document
+from ..document import DocumentHolder
 from ..global_common import GlobalCommon
 from .common import GuiCommon
 from .main_window import MainWindow
@@ -87,7 +87,7 @@ def gui_main(filename: Optional[str]) -> bool:
 
     # Open a document in a window
     def new_window(input_file_path: Optional[str] = None) -> None:
-        document = Document(input_file_path)
+        document = DocumentHolder(input_file_path)
         window_id = uuid.uuid4().hex
         window = MainWindow(global_common, gui_common, window_id, document)
         window.delete_window.connect(delete_window)

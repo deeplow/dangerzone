@@ -7,9 +7,9 @@ from typing import Optional
 import appdirs
 
 
-class Document(object):
+class DocumentHolder(object):
     """
-    The Common class is a singleton of shared functionality throughout an open dangerzone window
+    Keeps track of one document
     """
 
     def __init__(self, input_file_path: str) -> None:

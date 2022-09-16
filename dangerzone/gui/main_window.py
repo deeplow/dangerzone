@@ -12,7 +12,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 
 from .. import container
 from ..container import convert
-from ..document import Document
+from ..document import DocumentHolder
 from ..global_common import GlobalCommon
 from ..util import get_resource_path, get_subprocess_startupinfo
 from .common import GuiCommon
@@ -28,7 +28,7 @@ class MainWindow(QtWidgets.QMainWindow):
         global_common: GlobalCommon,
         gui_common: GuiCommon,
         window_id: str,
-        document: Document,
+        document: DocumentHolder,
     ) -> None:
         super(MainWindow, self).__init__()
         self.global_common = global_common
@@ -210,7 +210,10 @@ class ContentWidget(QtWidgets.QWidget):
     close_window = QtCore.Signal()
 
     def __init__(
-        self, global_common: GlobalCommon, gui_common: GuiCommon, document: Document
+        self,
+        global_common: GlobalCommon,
+        gui_common: GuiCommon,
+        document: DocumentHolder,
     ) -> None:
         super(ContentWidget, self).__init__()
 
@@ -266,7 +269,7 @@ class ContentWidget(QtWidgets.QWidget):
 class DocSelectionWidget(QtWidgets.QWidget):
     document_selected = QtCore.Signal()
 
-    def __init__(self, document: Document) -> None:
+    def __init__(self, document: DocumentHolder) -> None:
         super(DocSelectionWidget, self).__init__()
         self.document = document
 
@@ -309,7 +312,10 @@ class SettingsWidget(QtWidgets.QWidget):
     close_window = QtCore.Signal()
 
     def __init__(
-        self, global_common: GlobalCommon, gui_common: GuiCommon, document: Document
+        self,
+        global_common: GlobalCommon,
+        gui_common: GuiCommon,
+        document: DocumentHolder,
     ) -> None:
         super(SettingsWidget, self).__init__()
         self.global_common = global_common
@@ -503,7 +509,7 @@ class ConvertThread(QtCore.QThread):
     finished = QtCore.Signal(bool)
     update = QtCore.Signal(bool, str, int)
 
-    def __init__(self, global_common: GlobalCommon, document: Document) -> None:
+    def __init__(self, global_common: GlobalCommon, document: DocumentHolder) -> None:
         super(ConvertThread, self).__init__()
         self.global_common = global_common
         self.document = document
@@ -552,7 +558,10 @@ class ConvertWidget(QtWidgets.QWidget):
     close_window = QtCore.Signal()
 
     def __init__(
-        self, global_common: GlobalCommon, gui_common: GuiCommon, document: Document
+        self,
+        global_common: GlobalCommon,
+        gui_common: GuiCommon,
+        document: DocumentHolder,
     ) -> None:
         super(ConvertWidget, self).__init__()
         self.global_common = global_common

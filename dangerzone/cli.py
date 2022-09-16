@@ -9,7 +9,7 @@ from colorama import Back, Fore, Style
 
 from . import container
 from .container import convert
-from .document import Document
+from .document import DocumentHolder
 from .global_common import GlobalCommon
 from .util import get_version
 
@@ -43,7 +43,7 @@ def cli_main(
         click.echo("Invalid filename")
         exit(1)
 
-    document = Document(os.path.abspath(filename))
+    document = DocumentHolder(os.path.abspath(filename))
 
     # Validate safe PDF output filename
     if output_filename:
