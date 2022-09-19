@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .global_common import GlobalCommon
+    from .logic import GlobalCommon
 
 
 class Settings:

@@ -10,7 +10,7 @@ from colorama import Back, Fore, Style
 from . import container
 from .container import convert
 from .document import DocumentFilenameException, DocumentHolder
-from .global_common import GlobalCommon
+from .logic import GlobalCommon
 from .util import get_version
 
 

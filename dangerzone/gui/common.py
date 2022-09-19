@@ -17,7 +17,7 @@ elif platform.system() == "Linux":
     import getpass
     from xdg.DesktopEntry import DesktopEntry
 
-from ..global_common import GlobalCommon
+from ..logic import GlobalCommon
 from ..settings import Settings
 from ..util import get_resource_path
 

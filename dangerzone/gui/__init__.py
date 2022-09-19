@@ -11,7 +11,7 @@ import colorama
 from PySide2 import QtCore, QtGui, QtWidgets
 
 from ..document import DocumentFilenameException, DocumentHolder
-from ..global_common import GlobalCommon
+from ..logic import GlobalCommon
 from .common import GuiCommon
 from .main_window import MainWindow
 from .systray import SysTray

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from PySide2 import QtWidgets
 
-from ..global_common import GlobalCommon
+from ..logic import GlobalCommon
 from .common import GuiCommon
 
 if TYPE_CHECKING:

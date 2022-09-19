@@ -13,7 +13,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from .. import container
 from ..container import convert
 from ..document import DocumentHolder
-from ..global_common import GlobalCommon
+from ..logic import GlobalCommon
 from ..util import get_resource_path, get_subprocess_startupinfo
 from .common import GuiCommon
 
