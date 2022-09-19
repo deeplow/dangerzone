@@ -37,14 +37,13 @@ def cli_main(
         click.echo(str(e))
         exit(1)
 
-    # Validate safe PDF output filename
+    # Set PDF output filename
     try:
         if output_filename:
             document.output_filename = output_filename
         else:
-            document.output_filename = (
-                f"{os.path.splitext(document.input_filename)[0]}-safe.pdf"
-            )
+            document.set_default_output_filename()
+
     except DocumentFilenameException as e:
         click.echo(str(e))
         exit(1)

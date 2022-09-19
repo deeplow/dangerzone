@@ -6,6 +6,8 @@ from typing import Optional
 
 import appdirs
 
+SAFE_EXTENSION = "-safe.pdf"
+
 
 class DocumentHolder(object):
     """
@@ -63,6 +65,11 @@ class DocumentHolder(object):
             raise DocumentFilenameException("Safe PDF filename is not writable")
 
         self._output_filename = file_path
+
+    def set_default_output_filename(self) -> None:
+        self.output_filename = (
+            f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
+        )
 
 
 class DocumentFilenameException(Exception):
