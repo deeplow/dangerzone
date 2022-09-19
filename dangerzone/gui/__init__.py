@@ -69,14 +69,13 @@ def gui_main(filename: Optional[str]) -> bool:
     app = app_wrapper.app
 
     # Common objects
-    global_common = GlobalCommon()
-    gui_common = GuiCommon(app, global_common)
+    gui_common = GuiCommon(app)
 
     # Allow Ctrl-C to smoothly quit the program instead of throwing an exception
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     # Create the system tray
-    systray = SysTray(global_common, gui_common, app, app_wrapper)
+    systray = SysTray(gui_common, app, app_wrapper)
 
     closed_windows: Dict[str, MainWindow] = {}
     windows: Dict[str, MainWindow] = {}
@@ -90,7 +89,7 @@ def gui_main(filename: Optional[str]) -> bool:
         try:
             document = DocumentHolder(input_file_path)
             window_id = uuid.uuid4().hex
-            window = MainWindow(global_common, gui_common, window_id, document)
+            window = MainWindow(gui_common, window_id, document)
             window.delete_window.connect(delete_window)
             windows[window_id] = window
 

@@ -13,13 +13,11 @@ if TYPE_CHECKING:
 class SysTray(QtWidgets.QSystemTrayIcon):
     def __init__(
         self,
-        global_common: GlobalCommon,
         gui_common: GuiCommon,
         app: QtWidgets.QApplication,
         app_wrapper: "ApplicationWrapper",
     ) -> None:
         super(SysTray, self).__init__()
-        self.global_common = global_common
         self.gui_common = gui_common
         self.app = app
         self.app_wrapper = app_wrapper
