@@ -105,10 +105,7 @@ def gui_main(filename: Optional[str]) -> bool:
     if filename is None:
         new_window()
     else:
-        # If filename is passed as an argument, open it
-        input_file_path: str = os.path.abspath(os.path.expanduser(filename))
-
-        new_window(input_file_path)
+        new_window(filename)
 
     # Open a new window, if all windows are closed
     def application_activated() -> None:

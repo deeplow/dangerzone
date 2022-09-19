@@ -28,9 +28,10 @@ class DocumentHolder(object):
 
     @input_filename.setter
     def input_filename(self, filename: str) -> None:
+        file_path = os.path.abspath(filename)
         # validate input filename
         try:
-            open(filename, "rb")
+            open(file_path, "rb")
         except FileNotFoundError:
             raise DocumentFilenameException(
                 "Input file not found: make sure you typed it correctly."
@@ -40,7 +41,7 @@ class DocumentHolder(object):
                 "You don't have permission to open the input file."
             )
 
-        self._input_filename = filename
+        self._input_filename = file_path
 
     @property
     def output_filename(self) -> str:
@@ -51,16 +52,17 @@ class DocumentHolder(object):
 
     @output_filename.setter
     def output_filename(self, filename: str) -> None:
+        file_path = os.path.abspath(filename)
         # validate output filename
-        if not filename.endswith(".pdf"):
+        if not file_path.endswith(".pdf"):
             raise DocumentFilenameException("Safe PDF filename must end in '.pdf'")
         try:
-            with open(os.path.abspath(filename), "wb"):
+            with open(file_path, "wb"):
                 pass
         except PermissionError:
             raise DocumentFilenameException("Safe PDF filename is not writable")
 
-        self._output_filename = filename
+        self._output_filename = file_path
 
 
 class DocumentFilenameException(Exception):
