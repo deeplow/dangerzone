@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING
 
 from PySide2 import QtWidgets
 
-from ..logic import GlobalCommon
-from .common import GuiCommon
+from .gui_logic import DangerzoneGui
 
 if TYPE_CHECKING:
     from . import ApplicationWrapper
@@ -13,16 +12,16 @@ if TYPE_CHECKING:
 class SysTray(QtWidgets.QSystemTrayIcon):
     def __init__(
         self,
-        gui_common: GuiCommon,
+        dangerzone: DangerzoneGui,
         app: QtWidgets.QApplication,
         app_wrapper: "ApplicationWrapper",
     ) -> None:
         super(SysTray, self).__init__()
-        self.gui_common = gui_common
+        self.dangerzone = dangerzone
         self.app = app
         self.app_wrapper = app_wrapper
 
-        self.setIcon(self.gui_common.get_window_icon())
+        self.setIcon(self.dangerzone.get_window_icon())
 
         menu = QtWidgets.QMenu()
 
