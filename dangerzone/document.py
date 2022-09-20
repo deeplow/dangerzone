@@ -1,3 +1,4 @@
+import enum
 import os
 import platform
 import stat
@@ -18,12 +19,19 @@ class Document:
     document, and validating its info.
     """
 
+    # document conversion state
+    STATE_UNSAFE = enum.auto()
+    STATE_SAFE = enum.auto()
+    STATE_FAILED = enum.auto()
+
     def __init__(self, input_filename: str = None) -> None:
         self._input_filename: Optional[str] = None
         self._output_filename: Optional[str] = None
 
         if input_filename:
             self.input_filename = input_filename
+
+        self.state = Document.STATE_UNSAFE
 
     @staticmethod
     def normalize_filename(filename: str) -> str:
@@ -82,3 +90,18 @@ class Document:
         self.output_filename = (
             f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
         )
+
+    def is_unsafe(self) -> bool:
+        return self.state is Document.STATE_UNSAFE
+
+    def is_failed(self) -> bool:
+        return self.state is Document.STATE_FAILED
+
+    def is_safe(self) -> bool:
+        return self.state is Document.STATE_SAFE
+
+    def mark_as_failed(self) -> None:
+        self.state = Document.STATE_FAILED
+
+    def mark_as_safe(self) -> None:
+        self.state = Document.STATE_SAFE
