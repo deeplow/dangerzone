@@ -19,12 +19,17 @@ class Document:
     document, and validating its info.
     """
 
+    doc_counter = 1
+
     # document conversion state
     STATE_UNCONVERTED = enum.auto()
     STATE_SAFE = enum.auto()
     STATE_FAILED = enum.auto()
 
     def __init__(self, input_filename: str = None, output_filename: str = None) -> None:
+        self.id = Document.doc_counter
+        Document.doc_counter += 1
+
         self._input_filename: Optional[str] = None
         self._output_filename: Optional[str] = None
 
