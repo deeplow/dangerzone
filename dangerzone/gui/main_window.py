@@ -91,9 +91,6 @@ class MainWindow(QtWidgets.QMainWindow):
         e.accept()
         self.delete_window.emit(self.window_id)
 
-        if platform.system() != "Darwin":
-            self.dangerzone.app.quit()
-
 
 class InstallContainerThread(QtCore.QThread):
     finished = QtCore.Signal()
@@ -624,8 +621,4 @@ class ConvertWidget(QtWidgets.QWidget):
             self.dangerzone.open_pdf_viewer(self.document.output_filename)
 
         # Quit
-        if platform.system() == "Darwin":
-            # In macOS, just close the window
-            self.close_window.emit()
-        else:
-            self.dangerzone.app.quit()
+        self.close_window.emit()
