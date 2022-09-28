@@ -104,6 +104,32 @@ class Document:
     def announce_id(self) -> None:
         log.info(f"Assigning ID '{self.id}' to doc '{self.input_filename}'")
 
+    def set_output_dir(self, path: str) -> None:
+        if not self._output_filename:
+            self.set_default_output_filename()
+
+        # keep the same name
+        old_filename = os.path.basename(self.output_filename)
+
+        new_path = os.path.abspath(path)
+        if not os.path.exists(new_path):
+            raise errors.NonExistantOutputDirException()
+        if not os.path.isdir(new_path):
+            raise errors.OutputDirIsNotDirException()
+        if not os.access(new_path, os.W_OK):
+            raise errors.UnwriteableOutputDirException()
+
+        self._output_filename = os.path.join(new_path, old_filename)
+
+    def set_output_filename_suffix(self, suffix: str) -> None:
+        """
+        Changes the output filename from [output_filename].pdf to [output_filename][suffix]
+        """
+        self.output_filename = f"{os.path.splitext(self.input_filename)[0]}{suffix}"
+
+    def set_default_output_filename(self) -> None:
+        self.set_output_filename_suffix(SAFE_EXTENSION)
+
     def is_unconverted(self) -> bool:
         return self.state is Document.STATE_UNCONVERTED
 
