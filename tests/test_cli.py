@@ -106,7 +106,9 @@ class CLIResult(Result):
 
 
 class TestCli(TestBase):
-    def run_cli(self, args: Sequence[str] | str = ()) -> CLIResult:
+    def run_cli(
+        self, args: Sequence[str] | str = (), tmp_path: Path = None
+    ) -> CLIResult:
         """Run the CLI with the provided arguments.
 
         Callers can either provide a list of arguments (iterable), or a single
@@ -120,7 +122,17 @@ class TestCli(TestBase):
             # Convert the single argument to a tuple, else Click will attempt
             # to tokenize it.
             args = (args,)
-        result = CliRunner().invoke(cli_main, args)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as new_path:
+            if tmp_path:
+                # isolated_filesystem() creates a subdirectory (new_path)
+                # this "merges" the two directories so that helper files
+                # are in the same dir as the one where the cli is called
+                for f in os.listdir(tmp_path):
+                    src_path = os.path.join(tmp_path, f)
+                    dst_path = os.path.join(new_path, f)
+                    os.symlink(src_path, dst_path)
+            result = runner.invoke(cli_main, args)
         return CLIResult.reclass_click_result(result, args)
 
 
@@ -197,3 +209,17 @@ class TestCliConversion(TestCliBasic):
         result = self.run_cli(doc_path)
         result.assert_success()
         assert len(os.listdir(tmp_path)) == 2
+
+
+class TestSecurity(TestCliBasic):
+    def test_file_pretending_as_parameter(self, tmp_path: Path) -> None:
+        """
+        Protection against "dangeronze-cli *" where a file is maliciously named
+        as an argument.
+        """
+        file_path = tmp_path / "--help"
+        file_path.touch()
+        result = self.run_cli(["--help"], tmp_path)
+
+        assert "Security: one file is maliciously named" in result.stdout
+        result.assert_failure()

@@ -19,7 +19,12 @@ def print_header(s: str) -> None:
     click.echo(Style.BRIGHT + s)
 
 
-@click.command()
+@click.command(
+    context_settings={
+        # HACK use norm. func. as a way to sanitize all params
+        "token_normalize_func": args.sanitize_parameters
+    },
+)
 @click.option(
     "--output-filename",
     callback=args.validate_output_filename,

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import click
@@ -15,6 +16,31 @@ def _validate_input_filename(
     filename = Document.normalize_filename(value)
     Document.validate_input_filename(filename)
     return filename
+
+
+def sanitize_parameters(original_param: str) -> str:
+    """
+    Mitigates command injection vulnerabilities. Checks if an argument exists
+    could have originated from a file
+
+    Example without mitigation:
+
+        $ dangerzone *
+
+    One file is maliciously named "--ocr-lang" or some other parameter would be
+    interpreted as a parameter and not as a file.
+    """
+    parameter = f"--{original_param}"
+    if (
+        Path(parameter).is_file()
+        or Path(parameter).is_dir()
+        or Path(parameter).is_fifo()
+        or Path(parameter).is_symlink()
+    ):
+        raise click.UsageError(
+            f"Security: one file is maliciously named '{parameter}'. Aborting conversion."
+        )
+    return parameter
 
 
 @errors.handle_document_errors
