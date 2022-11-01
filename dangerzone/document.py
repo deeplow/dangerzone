@@ -24,12 +24,15 @@ class Document:
     STATE_SAFE = enum.auto()
     STATE_FAILED = enum.auto()
 
-    def __init__(self, input_filename: str = None) -> None:
+    def __init__(self, input_filename: str = None, output_filename: str = None) -> None:
         self._input_filename: Optional[str] = None
         self._output_filename: Optional[str] = None
 
         if input_filename:
             self.input_filename = input_filename
+
+            if output_filename:
+                self.output_filename = output_filename
 
         self.state = Document.STATE_UNCONVERTED
 
@@ -72,6 +75,11 @@ class Document:
         filename = self.normalize_filename(filename)
         self.validate_input_filename(filename)
         self._input_filename = filename
+
+        # set the default output filename as soon as we know the input filename
+        self.output_filename = (
+            f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
+        )
 
     @property
     def output_filename(self) -> str:

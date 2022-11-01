@@ -80,7 +80,7 @@ def test_output_file_not_pdf(tmp_path: Path) -> None:
     assert not os.path.exists(docx_file)
 
 
-def test_is_unsafe_by_default(sample_doc: None) -> None:
+def test_is_unconverted_by_default(sample_doc: None) -> None:
     d = Document(sample_doc)
     assert d.is_unconverted()
 

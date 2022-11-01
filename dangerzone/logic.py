@@ -43,11 +43,7 @@ class DangerzoneCore(object):
     def add_document(
         self, input_filename: str, output_filename: Optional[str] = None
     ) -> None:
-        doc = Document(input_filename)
-        if output_filename:
-            doc.output_filename = output_filename
-        else:
-            doc.set_default_output_filename()
+        doc = Document(input_filename, output_filename)
         self.documents.append(doc)
 
     def convert_documents(
