@@ -82,7 +82,7 @@ def test_output_file_not_pdf(tmp_path: Path) -> None:
 
 def test_is_unsafe_by_default(sample_doc: None) -> None:
     d = Document(sample_doc)
-    assert d.is_unsafe()
+    assert d.is_unconverted()
 
 
 def test_mark_as_safe(sample_doc: str) -> None:
@@ -90,7 +90,7 @@ def test_mark_as_safe(sample_doc: str) -> None:
     d.mark_as_safe()
     assert d.is_safe()
     assert not d.is_failed()
-    assert not d.is_unsafe()
+    assert not d.is_unconverted()
 
 
 def test_mark_as_failed(sample_doc: str) -> None:
@@ -98,4 +98,4 @@ def test_mark_as_failed(sample_doc: str) -> None:
     d.mark_as_failed()
     assert d.is_failed()
     assert not d.is_safe()
-    assert not d.is_unsafe()
+    assert not d.is_unconverted()

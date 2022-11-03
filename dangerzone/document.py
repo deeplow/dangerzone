@@ -20,7 +20,7 @@ class Document:
     """
 
     # document conversion state
-    STATE_UNSAFE = enum.auto()
+    STATE_UNCONVERTED = enum.auto()
     STATE_SAFE = enum.auto()
     STATE_FAILED = enum.auto()
 
@@ -31,7 +31,7 @@ class Document:
         if input_filename:
             self.input_filename = input_filename
 
-        self.state = Document.STATE_UNSAFE
+        self.state = Document.STATE_UNCONVERTED
 
     @staticmethod
     def normalize_filename(filename: str) -> str:
@@ -91,8 +91,8 @@ class Document:
             f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
         )
 
-    def is_unsafe(self) -> bool:
-        return self.state is Document.STATE_UNSAFE
+    def is_unconverted(self) -> bool:
+        return self.state is Document.STATE_UNCONVERTED
 
     def is_failed(self) -> bool:
         return self.state is Document.STATE_FAILED
