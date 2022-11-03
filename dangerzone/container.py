@@ -141,7 +141,7 @@ def parse_progress(document: Document, line: str) -> Tuple[bool, str, int]:
         log.error(error_message)
         return (True, error_message, -1)
 
-    s = Style.BRIGHT + Fore.YELLOW + f"[doc {document.id}] "
+    s = Style.BRIGHT + Fore.YELLOW + f"[doc {document}] "
     s += Fore.CYAN + f"{status['percentage']}% "
     if status["error"]:
         s += Style.RESET_ALL + Fore.RED + status["text"]

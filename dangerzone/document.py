@@ -1,8 +1,10 @@
 import enum
+import logging
 import os
 import platform
 import stat
 import tempfile
+import uuid
 from typing import Optional
 
 import appdirs
@@ -10,6 +12,8 @@ import appdirs
 from .errors import DocumentFilenameException
 
 SAFE_EXTENSION = "-safe.pdf"
+
+log = logging.getLogger(__name__)
 
 
 class Document:
@@ -19,16 +23,14 @@ class Document:
     document, and validating its info.
     """
 
-    doc_counter = 1
-
     # document conversion state
     STATE_UNCONVERTED = enum.auto()
     STATE_SAFE = enum.auto()
     STATE_FAILED = enum.auto()
 
     def __init__(self, input_filename: str = None, output_filename: str = None) -> None:
-        self.id = Document.doc_counter
-        Document.doc_counter += 1
+        self.id = uuid.uuid4()
+        log.info(f"Assigning ID '{self.get_short_id()}' to doc '{input_filename}'")
 
         self._input_filename: Optional[str] = None
         self._output_filename: Optional[str] = None
@@ -115,3 +117,9 @@ class Document:
 
     def mark_as_safe(self) -> None:
         self.state = Document.STATE_SAFE
+
+    def get_short_id(self) -> str:
+        return str(self.id)[0:6]
+
+    def __str__(self) -> str:
+        return self.get_short_id()
