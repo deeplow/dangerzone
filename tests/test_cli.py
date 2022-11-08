@@ -123,17 +123,20 @@ class TestCli(TestBase):
             # Convert the single argument to a tuple, else Click will attempt
             # to tokenize it.
             args = (args,)
-        runner = CliRunner()
-        with runner.isolated_filesystem(temp_dir=tmp_path) as new_path:
-            if tmp_path:
-                # isolated_filesystem() creates a subdirectory (new_path)
-                # this "merges" the two directories so that helper files
-                # are in the same dir as the one where the cli is called
-                for f in os.listdir(tmp_path):
-                    src_path = os.path.join(tmp_path, f)
-                    dst_path = os.path.join(new_path, f)
-                    os.symlink(src_path, dst_path)
-            result = runner.invoke(cli_main, args)
+
+        # TODO: Replace this with `contextlib.chdir()` [1], which was added in
+        # Python 3.11.
+        #
+        # [1]: # https://docs.python.org/3/library/contextlib.html#contextlib.chdir
+        try:
+            if tmp_path is not None:
+                cwd = os.getcwd()
+                os.chdir(tmp_path)
+            result = CliRunner().invoke(cli_main, args)
+        finally:
+            if tmp_path is not None:
+                os.chdir(cwd)
+
         return CLIResult.reclass_click_result(result, args)
 
 
