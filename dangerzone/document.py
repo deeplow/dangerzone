@@ -76,15 +76,13 @@ class Document:
         self.validate_input_filename(filename)
         self._input_filename = filename
 
-        # set the default output filename as soon as we know the input filename
-        self.output_filename = (
-            f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
-        )
-
     @property
     def output_filename(self) -> str:
         if self._output_filename is None:
-            raise DocumentFilenameException("Output filename has not been set yet.")
+            if self._input_filename is not None:
+                return self.default_output_filename
+            else:
+                raise DocumentFilenameException("Output filename has not been set yet.")
         else:
             return self._output_filename
 
@@ -94,10 +92,9 @@ class Document:
         self.validate_output_filename(filename)
         self._output_filename = filename
 
-    def set_default_output_filename(self) -> None:
-        self.output_filename = (
-            f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
-        )
+    @property
+    def default_output_filename(self) -> str:
+        return f"{os.path.splitext(self.input_filename)[0]}{SAFE_EXTENSION}"
 
     def is_unconverted(self) -> bool:
         return self.state is Document.STATE_UNCONVERTED
