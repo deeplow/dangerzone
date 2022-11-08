@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import copy
 import os
 import shutil
@@ -211,15 +212,20 @@ class TestCliConversion(TestCliBasic):
         assert len(os.listdir(tmp_path)) == 2
 
 
-class TestSecurity(TestCliBasic):
-    def test_file_pretending_as_parameter(self, tmp_path: Path) -> None:
-        """
-        Protection against "dangeronze-cli *" where a file is maliciously named
-        as an argument.
-        """
-        file_path = tmp_path / "--help"
+class TestSecurity(TestCli):
+    def test_suspicious_double_dash_file(self, tmp_path: Path) -> None:
+        """Protection against "dangeronze-cli *" and files named --option."""
+        file_path = tmp_path / "--ocr-lang"
         file_path.touch()
-        result = self.run_cli(["--help"], tmp_path)
+        result = self.run_cli(["--ocr-lang", "eng"], tmp_path)
+        result.assert_failure(message="Security: Detected CLI options that are also")
 
-        assert "Security: one file is maliciously named" in result.stdout
-        result.assert_failure()
+    def test_suspicious_double_dash_and_equals_file(self, tmp_path: Path) -> None:
+        """Protection against "dangeronze-cli *" and files named --option=value."""
+        file_path = tmp_path / "--output-filename=bad"
+        file_path.touch()
+        result = self.run_cli(["--output-filename=bad", "eng"], tmp_path)
+        result.assert_failure(message="Security: Detected CLI options that are also")
+
+        # TODO: Check that this applies for single dash arguments, and concatenated
+        # single dash arguments, once Dangerzone supports them.

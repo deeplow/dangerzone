@@ -1,4 +1,4 @@
-from pathlib import Path
+import os
 from typing import List, Optional, Tuple
 
 import click
@@ -16,31 +16,6 @@ def _validate_input_filename(
     filename = Document.normalize_filename(value)
     Document.validate_input_filename(filename)
     return filename
-
-
-def sanitize_parameters(original_param: str) -> str:
-    """
-    Mitigates command injection vulnerabilities. Checks if an argument exists
-    could have originated from a file
-
-    Example without mitigation:
-
-        $ dangerzone *
-
-    One file is maliciously named "--ocr-lang" or some other parameter would be
-    interpreted as a parameter and not as a file.
-    """
-    parameter = f"--{original_param}"
-    if (
-        Path(parameter).is_file()
-        or Path(parameter).is_dir()
-        or Path(parameter).is_fifo()
-        or Path(parameter).is_symlink()
-    ):
-        raise click.UsageError(
-            f"Security: one file is maliciously named '{parameter}'. Aborting conversion."
-        )
-    return parameter
 
 
 @errors.handle_document_errors
@@ -90,3 +65,24 @@ def validate_output_filename(
     ctx: click.Context, param: str, value: Optional[str]
 ) -> Optional[str]:
     return _validate_output_filename(ctx, param, value)
+
+
+def check_suspicious_options(args: List[str]) -> None:
+    options = set([arg for arg in args if arg.startswith("-")])
+    try:
+        files = set(os.listdir())
+    except Exception:
+        # If we can list files in the current working directory, this means that
+        # we're probably in an unlinked directory. Dangerzone should still work in
+        # this case, so we should return here.
+        return
+
+    intersection = options & files
+    if intersection:
+        filenames_str = ", ".join(intersection)
+        msg = (
+            f"Security: Detected CLI options that are also present as files in the"
+            f" current working directory: {filenames_str}"
+        )
+        click.echo(msg)
+        exit(1)

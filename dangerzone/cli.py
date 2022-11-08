@@ -1,8 +1,9 @@
+import functools
 import json
 import logging
 import os
 import sys
-from typing import List, Optional
+from typing import Any, Callable, List, Optional, TypeVar
 
 import click
 from colorama import Back, Fore, Style
@@ -13,18 +14,15 @@ from .document import SAFE_EXTENSION, Document
 from .logic import DangerzoneCore
 from .util import get_version
 
+F = TypeVar("F", bound=Callable[..., Any])
+
 
 def print_header(s: str) -> None:
     click.echo("")
     click.echo(Style.BRIGHT + s)
 
 
-@click.command(
-    context_settings={
-        # HACK use norm. func. as a way to sanitize all params
-        "token_normalize_func": args.sanitize_parameters
-    },
-)
+@click.command()
 @click.option(
     "--output-filename",
     callback=args.validate_output_filename,
@@ -101,6 +99,27 @@ def cli_main(
         exit(1)
     else:
         exit(0)
+
+
+def override_arg_parser() -> None:
+    """Override the argument parsing logic of Click.
+
+    We need a way to get the arguments that Click will parse, before it does so. That's
+    because we want to check if the unparsed arguments match the files in the current
+    working directory.
+    """
+    _parse_fn = cli_main.parse_args
+    check_fn = args.check_suspicious_options
+
+    @functools.wraps(_parse_fn)
+    def custom_parse_args(ctx: click.Context, args: List[str]) -> List[str]:
+        check_fn(args)
+        return _parse_fn(ctx, args)
+
+    cli_main.parse_args = custom_parse_args  # type: ignore [assignment]
+
+
+override_arg_parser()
 
 
 def setup_logging() -> None:
