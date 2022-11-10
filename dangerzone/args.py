@@ -1,3 +1,4 @@
+import functools
 import os
 from typing import List, Optional, Tuple
 
@@ -86,3 +87,22 @@ def check_suspicious_options(args: List[str]) -> None:
         )
         click.echo(msg)
         exit(1)
+
+
+def override_parser_and_check_suspicious_options(click_main: click.Command) -> None:
+    """Override the argument parsing logic of Click.
+
+    Click does not allow us to have access to the raw arguments that it receives (either
+    from sys.argv or from its testing module). To circumvent this, we can override its
+    `Command.parse_args()` method, which is public and should be safe to do so.
+
+    We can use it to check for any suspicious options prior to arg parsing.
+    """
+    orig_parse_fn = click_main.parse_args
+
+    @functools.wraps(orig_parse_fn)
+    def custom_parse_fn(ctx: click.Context, args: List[str]) -> List[str]:
+        check_suspicious_options(args)
+        return orig_parse_fn(ctx, args)
+
+    click_main.parse_args = custom_parse_fn  # type: ignore [assignment]

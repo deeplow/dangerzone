@@ -1,7 +1,5 @@
-import functools
 import json
 import logging
-import os
 import sys
 from typing import Any, Callable, List, Optional, TypeVar
 
@@ -9,8 +7,7 @@ import click
 from colorama import Back, Fore, Style
 
 from . import args, container, errors
-from .container import convert
-from .document import SAFE_EXTENSION, Document
+from .document import SAFE_EXTENSION
 from .logic import DangerzoneCore
 from .util import get_version
 
@@ -101,25 +98,7 @@ def cli_main(
         exit(0)
 
 
-def override_arg_parser() -> None:
-    """Override the argument parsing logic of Click.
-
-    We need a way to get the arguments that Click will parse, before it does so. That's
-    because we want to check if the unparsed arguments match the files in the current
-    working directory.
-    """
-    _parse_fn = cli_main.parse_args
-    check_fn = args.check_suspicious_options
-
-    @functools.wraps(_parse_fn)
-    def custom_parse_args(ctx: click.Context, args: List[str]) -> List[str]:
-        check_fn(args)
-        return _parse_fn(ctx, args)
-
-    cli_main.parse_args = custom_parse_args  # type: ignore [assignment]
-
-
-override_arg_parser()
+args.override_parser_and_check_suspicious_options(cli_main)
 
 
 def setup_logging() -> None:
