@@ -1,4 +1,5 @@
 import gzip
+import json
 import logging
 import os
 import pipes
@@ -6,7 +7,8 @@ import platform
 import shutil
 import subprocess
 import tempfile
-from typing import Callable, List, Optional
+from contextlib import contextmanager
+from typing import Callable, Iterator, List, Optional
 
 import appdirs
 
@@ -47,6 +49,19 @@ def get_runtime() -> str:
     if runtime is None:
         raise NoContainerTechException(container_tech)
     return runtime
+
+
+def podman_get_subids():
+    info = subprocess.run(
+        ["podman", "info", "-f", "json"], check=True, stdout=subprocess.PIPE
+    )
+    info_dict = json.loads(info.stdout)
+    for id_type in ["uid", "gid"]:
+        mapping = info_dict["host"]["idMappings"][f"{id_type}map"]
+        count = 0
+        for m in mapping[1:]:
+            count += m["size"]
+        yield count
 
 
 def install() -> bool:
@@ -158,7 +173,9 @@ def exec_container(
     if get_runtime_name() == "podman":
         platform_args = []
         security_args = ["--security-opt", "no-new-privileges"]
-        security_args += ["--userns", "keep-id"]
+        num_subuids, num_subgids = podman_get_subids()
+        security_args += ["--uidmap", f"0:1:{num_subuids}"]
+        security_args += ["--gidmap", f"0:1:{num_subgids}"]
     else:
         platform_args = ["--platform", "linux/amd64"]
         security_args = ["--security-opt=no-new-privileges:true"]
@@ -190,6 +207,10 @@ def convert(
     ocr_lang: Optional[str],
     stdout_callback: Callable[[str], None],
 ) -> bool:
+    dz_tmp = os.path.join(appdirs.user_config_dir("dangerzone"), "tmp")
+    os.makedirs(dz_tmp, exist_ok=True)
+    tmpdir = tempfile.TemporaryDirectory(dir=dz_tmp)
+
     success = False
 
     if ocr_lang:
@@ -197,61 +218,82 @@ def convert(
     else:
         ocr = "0"
 
-    dz_tmp = os.path.join(appdirs.user_config_dir("dangerzone"), "tmp")
-    os.makedirs(dz_tmp, exist_ok=True)
-
-    tmpdir = tempfile.TemporaryDirectory(dir=dz_tmp)
+    tmp_input_file = os.path.join(tmpdir.name, "input_file")
     pixel_dir = os.path.join(tmpdir.name, "pixels")
     safe_dir = os.path.join(tmpdir.name, "safe")
+    shutil.copy(input_filename, tmp_input_file)
     os.makedirs(pixel_dir, exist_ok=True)
     os.makedirs(safe_dir, exist_ok=True)
 
-    # Convert document to pixels
-    command = ["/usr/bin/python3", "/usr/local/bin/dangerzone.py", "document-to-pixels"]
-    extra_args = [
-        "-v",
-        f"{input_filename}:/tmp/input_file",
-        "-v",
-        f"{pixel_dir}:/dangerzone",
-    ]
-    ret = exec_container(command, extra_args, stdout_callback)
-    if ret != 0:
-        log.error("documents-to-pixels failed")
-    else:
-        # TODO: validate convert to pixels output
-
-        # Convert pixels to safe PDF
-        command = ["/usr/bin/python3", "/usr/local/bin/dangerzone.py", "pixels-to-pdf"]
+    with namespaced_tmpdir(tmpdir):
+        # Convert document to pixels
+        command = [
+            "/usr/bin/python3",
+            "/usr/local/bin/dangerzone.py",
+            "document-to-pixels",
+        ]
         extra_args = [
             "-v",
-            f"{pixel_dir}:/dangerzone",
+            f"{tmp_input_file}:/tmp/input_file",
             "-v",
-            f"{safe_dir}:/safezone",
-            "-e",
-            f"OCR={ocr}",
-            "-e",
-            f"OCR_LANGUAGE={ocr_lang}",
+            f"{pixel_dir}:/dangerzone",
         ]
         ret = exec_container(command, extra_args, stdout_callback)
         if ret != 0:
-            log.error("pixels-to-pdf failed")
+            log.error("documents-to-pixels failed")
         else:
-            # Move the final file to the right place
-            if os.path.exists(output_filename):
-                os.remove(output_filename)
+            # TODO: validate convert to pixels output
 
-            container_output_filename = os.path.join(
-                safe_dir, "safe-output-compressed.pdf"
-            )
-            shutil.move(container_output_filename, output_filename)
+            # Convert pixels to safe PDF
+            command = [
+                "/usr/bin/python3",
+                "/usr/local/bin/dangerzone.py",
+                "pixels-to-pdf",
+            ]
+            extra_args = [
+                "-v",
+                f"{pixel_dir}:/dangerzone",
+                "-v",
+                f"{safe_dir}:/safezone",
+                "-e",
+                f"OCR={ocr}",
+                "-e",
+                f"OCR_LANGUAGE={ocr_lang}",
+            ]
+            ret = exec_container(command, extra_args, stdout_callback)
+            if ret != 0:
+                log.error("pixels-to-pdf failed")
+            else:
+                # Move the final file to the right place
+                if os.path.exists(output_filename):
+                    os.remove(output_filename)
 
-            # We did it
-            success = True
+                # We did it
+                success = True
+
+    if success:
+        container_output_filename = os.path.join(safe_dir, "safe-output-compressed.pdf")
+        shutil.move(container_output_filename, output_filename)
 
     # Clean up
     tmpdir.cleanup()
 
     return success
+
+
+@contextmanager
+def namespaced_tmpdir(tmpdir: tempfile.TemporaryDirectory) -> Iterator:
+    try:
+        if get_runtime_name() == "podman":
+            unshare_cmd = ["podman", "unshare", "chown", "-R", "1001:1001", tmpdir.name]
+            log.debug("> " + " ".join(unshare_cmd))
+            subprocess.run(unshare_cmd, check=True)
+        yield
+    finally:
+        if get_runtime_name() == "podman":
+            unshare_cmd = ["podman", "unshare", "chown", "-R", "0:0", tmpdir.name]
+            log.debug("> " + " ".join(unshare_cmd))
+            subprocess.run(unshare_cmd, check=True)
 
 
 # From global_common:
