@@ -107,7 +107,7 @@ class Document:
         return self._suffix
 
     @suffix.setter
-    def suffix(self, suf: str) -> str:
+    def suffix(self, suf: str) -> None:
         if self._output_filename is None:
             self._suffix = suf
         else:
