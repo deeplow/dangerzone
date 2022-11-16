@@ -503,7 +503,7 @@ class SettingsWidget(QtWidgets.QWidget):
             selected_dir = dialog.selectedFiles()[0]
             if selected_dir is not None:
                 self.output_dir = str(selected_dir)  # type: ignore [assignment]
-                self.save_location.setText(os.path.basename(selected_dir))
+                self.save_location.setText(selected_dir)
 
     def start_button_clicked(self) -> None:
         if self.save_checkbox.checkState() == QtCore.Qt.Unchecked:
