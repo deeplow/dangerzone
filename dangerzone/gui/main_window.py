@@ -513,7 +513,7 @@ class SettingsWidget(QtWidgets.QWidget):
                 document.output_filename = tmp
         else:
             for document in self.dangerzone.get_unconverted_documents():
-                document.set_output_filename_suffix(self.safe_extension.text())
+                document.suffix = self.safe_extension.text()
 
                 if self.output_dir:
                     document.set_output_dir(self.output_dir)  # type: ignore [unreachable]

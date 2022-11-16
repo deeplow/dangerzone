@@ -102,16 +102,15 @@ def test_set_output_dir_is_file(sample_doc: str, tmp_path: Path) -> None:
         d.set_output_dir(file_path)
 
 
-def test_set_default_output_filename(sample_doc: str) -> None:
+def test_default_output_filename(sample_doc: str) -> None:
     d = Document(sample_doc)
-    d.set_default_output_filename()
     assert d.output_filename.endswith(SAFE_EXTENSION)
 
 
 def test_set_output_filename_suffix(sample_doc: str) -> None:
     d = Document(sample_doc)
     safe_extension = "-trusted.pdf"
-    d.set_output_filename_suffix(safe_extension)
+    d.suffix = safe_extension
     assert d.output_filename.endswith(safe_extension)
 
 
