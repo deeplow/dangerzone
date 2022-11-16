@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 import platform
@@ -5,7 +6,6 @@ import signal
 import sys
 import uuid
 from typing import Dict, List, Optional
-import functools
 
 import click
 import colorama
