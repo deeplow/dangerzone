@@ -30,8 +30,12 @@ class Document:
     STATE_SAFE = enum.auto()
     STATE_FAILED = enum.auto()
 
-    def __init__(self, input_filename: str = None, output_filename: str = None,
-                 suffix: str = SAFE_EXTENSION) -> None:
+    def __init__(
+        self,
+        input_filename: str = None,
+        output_filename: str = None,
+        suffix: str = SAFE_EXTENSION,
+    ) -> None:
         # NOTE: See https://github.com/freedomofpress/dangerzone/pull/216#discussion_r1015449418
         self.id = secrets.token_urlsafe(6)[0:6]
 
