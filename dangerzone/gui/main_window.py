@@ -256,7 +256,7 @@ class DocSelectionWidget(QtWidgets.QWidget):
         self.dangerous_doc_label = QtWidgets.QLabel()
         self.dangerous_doc_label.hide()
         self.dangerous_doc_button = QtWidgets.QPushButton(
-            "Select suspicious document ..."
+            "Select suspicious documents ..."
         )
         self.dangerous_doc_button.setStyleSheet(
             "QPushButton { font-weight: bold; padding: 10px; }"
