@@ -105,7 +105,10 @@ class Document:
 
     @suffix.setter
     def suffix(self, suf: str) -> str:
-        self._suffix = suf
+        if self._output_filename is None:
+            self._suffix = suf
+        else:
+            raise errors.SuffixNotApplicableException()
 
     @property
     def default_output_filename(self) -> str:
