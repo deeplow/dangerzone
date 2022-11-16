@@ -571,7 +571,6 @@ class DocumentsListWidget(QtWidgets.QListWidget):
         super().__init__()
         self.dangerzone = dangerzone
         self.document_widgets: List[DocumentWidget] = []
-        self.ocr_lang = self.get_ocr_lang()
 
         max_jobs = container.get_max_parallel_conversions()
         self.threadPool = ThreadPool(max_jobs)
@@ -588,7 +587,7 @@ class DocumentsListWidget(QtWidgets.QListWidget):
 
     def start_conversion(self) -> None:
         for doc_widget in self.document_widgets:
-            task = ConvertTask(doc_widget.document, self.ocr_lang)
+            task = ConvertTask(doc_widget.document, self.get_ocr_lang())
             task.update.connect(doc_widget.update_progress)
             task.finished.connect(doc_widget.all_done)
             self.threadPool.apply_async(task.convert_document)
