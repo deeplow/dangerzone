@@ -316,6 +316,7 @@ class SettingsWidget(QtWidgets.QWidget):
         self.save_browse_button.clicked.connect(self.select_output_directory)
         self.save_location_layout = QtWidgets.QHBoxLayout()
         self.save_location_layout.addWidget(self.save_checkbox)
+        self.save_location_layout.addWidget(self.save_label)
         self.save_location_layout.addWidget(self.save_location)
         self.save_location_layout.addWidget(self.save_browse_button)
         self.save_location_layout.addStretch()
@@ -343,7 +344,6 @@ class SettingsWidget(QtWidgets.QWidget):
         self.safe_extension_layout = QtWidgets.QHBoxLayout()
         self.safe_extension_layout.setContentsMargins(20, 0, 0, 0)
         self.safe_extension_layout.addWidget(self.safe_extension_label)
-        self.safe_extension_layout.addWidget(self.save_label)
         self.safe_extension_layout.addLayout(self.safe_extension_name_layout)
         self.safe_extension_layout.addWidget(self.safe_extension_invalid)
 
