@@ -572,8 +572,9 @@ class DocumentsListWidget(QtWidgets.QListWidget):
         self.dangerzone = dangerzone
         self.document_widgets: List[DocumentWidget] = []
 
-        max_jobs = container.get_max_parallel_conversions()
-        self.threadPool = ThreadPool(max_jobs)
+        # Initialize thread_pool only on the first conversion
+        # to ensure docker-daemon detection logic runs first
+        self.thread_pool_initized = False
 
     def documents_selected(self, selected_docs: List[Document]) -> None:
         for document in selected_docs:
@@ -586,11 +587,15 @@ class DocumentsListWidget(QtWidgets.QListWidget):
             self.document_widgets.append(widget)
 
     def start_conversion(self) -> None:
+        if not self.thread_pool_initized:
+            max_jobs = container.get_max_parallel_conversions()
+            self.thread_pool = ThreadPool(max_jobs)
+
         for doc_widget in self.document_widgets:
             task = ConvertTask(doc_widget.document, self.get_ocr_lang())
             task.update.connect(doc_widget.update_progress)
             task.finished.connect(doc_widget.all_done)
-            self.threadPool.apply_async(task.convert_document)
+            self.thread_pool.apply_async(task.convert_document)
 
     def get_ocr_lang(self) -> Optional[str]:
         ocr_lang = None
