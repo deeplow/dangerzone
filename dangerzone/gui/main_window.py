@@ -299,15 +299,7 @@ class SettingsWidget(QtWidgets.QWidget):
         # Save safe version
         self.save_checkbox = QtWidgets.QCheckBox("Save safe PDF to")
         self.save_checkbox.clicked.connect(self.update_ui)
-        self.save_label = QtWidgets.QLabel("Save safe PDF to")  # For Windows
-        self.save_label.hide()
         self.output_dir = None
-        if platform.system() == "Windows":
-            # In Windows, users must save the PDF, since they can't open it
-            self.save_checkbox.setCheckState(QtCore.Qt.Checked)
-            self.save_checkbox.setEnabled(False)
-            self.save_checkbox.hide()
-            self.save_label.show()
 
         # Save safe to...
         self.save_location = QtWidgets.QLineEdit()
@@ -316,7 +308,6 @@ class SettingsWidget(QtWidgets.QWidget):
         self.save_browse_button.clicked.connect(self.select_output_directory)
         self.save_location_layout = QtWidgets.QHBoxLayout()
         self.save_location_layout.addWidget(self.save_checkbox)
-        self.save_location_layout.addWidget(self.save_label)
         self.save_location_layout.addWidget(self.save_location)
         self.save_location_layout.addWidget(self.save_browse_button)
         self.save_location_layout.addStretch()
@@ -350,7 +341,7 @@ class SettingsWidget(QtWidgets.QWidget):
         self.safe_extension_layout.addStretch()
 
         # Open safe document
-        if platform.system() == "Darwin":
+        if platform.system() in ["Darwin", "Windows"]:
             self.open_checkbox = QtWidgets.QCheckBox(
                 "Open safe documents after converting"
             )
@@ -365,12 +356,11 @@ class SettingsWidget(QtWidgets.QWidget):
             for k in self.dangerzone.pdf_viewers:
                 self.open_combobox.addItem(k, self.dangerzone.pdf_viewers[k])
 
-        if platform.system() == "Darwin" or platform.system() == "Linux":
-            open_layout = QtWidgets.QHBoxLayout()
-            open_layout.addWidget(self.open_checkbox)
-            if platform.system() == "Linux":
-                open_layout.addWidget(self.open_combobox)
-            open_layout.addStretch()
+        open_layout = QtWidgets.QHBoxLayout()
+        open_layout.addWidget(self.open_checkbox)
+        if platform.system() == "Linux":
+            open_layout.addWidget(self.open_combobox)
+        open_layout.addStretch()
 
         # OCR document
         self.ocr_checkbox = QtWidgets.QCheckBox("OCR document, language")
@@ -398,8 +388,7 @@ class SettingsWidget(QtWidgets.QWidget):
         layout.addSpacing(20)
         layout.addLayout(self.save_location_layout)
         layout.addLayout(self.safe_extension_layout)
-        if platform.system() != "Windows":
-            layout.addLayout(open_layout)
+        layout.addLayout(open_layout)
         layout.addLayout(ocr_layout)
         layout.addSpacing(20)
         layout.addLayout(button_layout)
@@ -688,15 +677,6 @@ class DocumentWidget(QtWidgets.QWidget):
 
         if self.error:
             return
-
-        # In Windows, open Explorer with the safe PDF in focus
-        if platform.system() == "Windows":
-            dest_filename_windows = self.document.output_filename.replace("/", "\\")
-            subprocess.Popen(
-                f'explorer.exe /select,"{dest_filename_windows}"',
-                shell=True,
-                startupinfo=get_subprocess_startupinfo(),
-            )
 
         # Open
         if self.dangerzone.settings.get("open"):
