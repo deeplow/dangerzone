@@ -9,7 +9,15 @@ from multiprocessing.pool import ThreadPool
 from typing import List, Optional
 
 from colorama import Fore, Style
-from PySide2 import QtCore, QtGui, QtWidgets
+
+try:
+    from PySide6 import QtCore, QtGui, QtWidgets
+
+    # Alias renamed Qt6 methods for backwards compatibility
+    QtCore.QRegExp = QtCore.QRegularExpression
+    QtGui.QRegExpValidator = QtGui.QRegularExpressionValidator
+except ImportError:
+    from PySide2 import QtCore, QtGui, QtWidgets
 
 from .. import container, errors
 from ..container import convert

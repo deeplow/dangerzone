@@ -8,7 +8,11 @@ from pathlib import Path
 from typing import Dict
 
 from colorama import Fore
-from PySide2 import QtCore, QtGui, QtWidgets
+
+try:
+    from PySide6 import QtCore, QtGui, QtWidgets
+except ImportError:
+    from PySide2 import QtCore, QtGui, QtWidgets
 
 if platform.system() == "Linux":
     from xdg.DesktopEntry import DesktopEntry
