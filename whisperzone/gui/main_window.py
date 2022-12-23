@@ -6,11 +6,20 @@ import shutil
 import subprocess
 import tempfile
 from abc import abstractmethod
+import typing
 from multiprocessing.pool import ThreadPool
 from typing import List, Optional
 
 from colorama import Fore, Style
-from PySide2 import QtCore, QtGui, QtWidgets
+
+# FIXME: See https://github.com/freedomofpress/dangerzone/issues/320 for more details.
+if typing.TYPE_CHECKING:
+    from PySide2 import QtCore, QtGui, QtWidgets
+else:
+    try:
+        from PySide6 import QtCore, QtGui, QtWidgets
+    except ImportError:
+        from PySide2 import QtCore, QtGui, QtWidgets
 
 from .. import errors
 from ..document import SAFE_EXTENSION, Document
