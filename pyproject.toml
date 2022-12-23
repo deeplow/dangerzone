@@ -31,7 +31,7 @@ strip-ansi = "*"
 black = "*"
 isort = "*"
 mypy = "*"
-PySide2-stubs = "*"
+PySide2-stubs = {version = "*", platform = "linux"}
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.1.2"
