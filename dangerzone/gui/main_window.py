@@ -55,9 +55,15 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addWidget(header_version_label)
         header_layout.addStretch()
 
-        # Waiting widget, replaces content widget while container runtime isn't available
-        self.waiting_widget = WaitingWidget(self.dangerzone)
-        self.waiting_widget.finished.connect(self.waiting_finished)
+        if isinstance(self.dangerzone.isolation_provider, isolation_provider.Container):
+            # Waiting widget replaces content widget while container runtime isn't available
+            self.waiting_widget = WaitingWidget(self.dangerzone)
+            self.waiting_widget.finished.connect(self.waiting_finished)
+
+        elif isinstance(self.dangerzone.isolation_provider, isolation_provider.Dummy):
+            # Don't wait with dummy converter
+            self.waiting_widget = QtWidgets.QWidget()
+            self.dangerzone.is_waiting_finished = True
 
         # Content widget, contains all the window content except waiting widget
         self.content_widget = ContentWidget(self.dangerzone)
