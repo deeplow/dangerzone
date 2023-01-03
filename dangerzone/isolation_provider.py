@@ -6,7 +6,9 @@ import pipes
 import platform
 import shutil
 import subprocess
+import sys
 import tempfile
+import time
 from abc import ABC, abstractmethod
 from typing import Callable, List, Optional, Tuple
 
@@ -31,7 +33,7 @@ class NoContainerTechException(Exception):
         super().__init__(f"{container_tech} is not installed")
 
 
-class AbstractIsolationProvider(ABC):
+class IsolationProvider(ABC):
     """
     Abstracts an isolation provider
     """
@@ -69,7 +71,7 @@ class AbstractIsolationProvider(ABC):
         pass
 
 
-class Container(AbstractIsolationProvider):
+class Container(IsolationProvider):
 
     # Name of the dangerzone container
     CONTAINER_NAME = "dangerzone.rocks/dangerzone"
@@ -355,6 +357,76 @@ class Container(AbstractIsolationProvider):
             n_cpu = int(n_cpu_str.strip())
 
         return 2 * n_cpu + 1
+
+
+class Dummy(IsolationProvider):
+    """Dummy Isolation Provider (FOR TESTING ONLY)
+
+    "Do-nothing" converter - the sanitized files are the same as the input files.
+    Useful for testing without the need to use docker.
+    """
+
+    def __init__(self) -> None:
+        # Sanity check
+        if not getattr(sys, "dangerzone_dev", False):
+            raise Exception(
+                "Dummy isolation provider is UNSAFE and should never be "
+                + "called in a non-testing system."
+            )
+
+    def install(self) -> bool:
+        pass
+
+    def _convert(
+        self,
+        document: Document,
+        ocr_lang: Optional[str],
+        stdout_callback: Optional[Callable] = None,
+    ) -> bool:
+        log.debug("Dummy converter started:")
+        log.debug(
+            f"  - document: {os.path.basename(document.input_filename)} ({document.id})"
+        )
+        log.debug(f"  - ocr     : {ocr_lang}")
+        log.debug("\n(simulating conversion)")
+
+        success = True
+
+        progress = [
+            [False, "Converting to PDF using GraphicsMagick", 0.0],
+            [False, "Separating document into pages", 3.0],
+            [False, "Converting page 1/1 to pixels", 5.0],
+            [False, "Converted document to pixels", 50.0],
+            [False, "Converting page 1/1 from pixels to PDF", 50.0],
+            [False, "Merging 1 pages into a single PDF", 95.0],
+            [False, "Compressing PDF", 97.0],
+            [False, "Safe PDF created", 100.0],
+        ]
+
+        for (error, text, percentage) in progress:
+            self._print_progress(document, error, text, percentage)  # type: ignore [arg-type]
+            if stdout_callback:
+                stdout_callback(error, text, percentage)
+            if error:
+                success = False
+            time.sleep(0.2)
+
+        return success
+
+    def _print_progress(
+        self, document: Document, error: bool, text: str, percentage: float
+    ) -> None:
+        s = Style.BRIGHT + Fore.YELLOW + f"[doc {document.id}] "
+        s += Fore.CYAN + f"{percentage}% "
+        if error:
+            s += Style.RESET_ALL + Fore.RED + text
+            log.error(s)
+        else:
+            s += Style.RESET_ALL + text
+            log.info(s)
+
+    def get_max_parallel_conversions(self) -> int:
+        return 1
 
 
 # From global_common:
