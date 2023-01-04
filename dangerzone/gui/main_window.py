@@ -180,7 +180,10 @@ class WaitingWidgetContainer(WaitingWidget):
         state: Optional[str] = None
 
         try:
-            container_runtime = self.dangerzone.isolation_provider.get_runtime()
+            if isinstance(  # Sanity check
+                self.dangerzone.isolation_provider, isolation_provider.Container
+            ):
+                container_runtime = self.dangerzone.isolation_provider.get_runtime()
         except isolation_provider.NoContainerTechException as e:
             log.error(str(e))
             state = "not_installed"
