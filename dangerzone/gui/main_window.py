@@ -12,10 +12,6 @@ from colorama import Fore, Style
 
 try:
     from PySide6 import QtCore, QtGui, QtWidgets
-
-    # Alias renamed Qt6 methods for backwards compatibility
-    QtCore.QRegExp = QtCore.QRegularExpression
-    QtGui.QRegExpValidator = QtGui.QRegularExpressionValidator
 except ImportError:
     from PySide2 import QtCore, QtGui, QtWidgets
 
@@ -372,8 +368,10 @@ class SettingsWidget(QtWidgets.QWidget):
         self.safe_extension_name_layout.addWidget(self.safe_extension_filename)
         self.safe_extension_name_layout.addWidget(self.safe_extension)
 
-        dot_pdf_regex = QtCore.QRegExp(r".*\.[Pp][Dd][Ff]")
-        self.safe_extension.setValidator(QtGui.QRegExpValidator(dot_pdf_regex))
+        dot_pdf_regex = QtCore.QRegularExpression(r".*\.[Pp][Dd][Ff]")
+        self.safe_extension.setValidator(
+            QtGui.QRegularExpressionValidator(dot_pdf_regex)
+        )
         self.safe_extension_layout = QtWidgets.QHBoxLayout()
         self.safe_extension_layout.addWidget(self.save_checkbox)
         self.safe_extension_layout.addWidget(self.safe_extension_label)
