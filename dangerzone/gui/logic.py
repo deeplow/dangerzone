@@ -10,9 +10,9 @@ from typing import Dict
 from colorama import Fore
 
 try:
-    from PySide6 import QtCore, QtGui, QtWidgets
-except ImportError:
     from PySide2 import QtCore, QtGui, QtWidgets
+except ImportError:
+    from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore [no-redef]
 
 if platform.system() == "Linux":
     from xdg.DesktopEntry import DesktopEntry

@@ -18,8 +18,7 @@ MYPY_ARGS := --ignore-missing-imports \
 			 --disallow-incomplete-defs \
 			 --disallow-untyped-defs \
 			 --show-error-codes \
-			 --warn-unreachable \
-			 --warn-unused-ignores
+			 --warn-unreachable
 
 mypy-host:
 	mypy $(MYPY_ARGS) dangerzone

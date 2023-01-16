@@ -11,9 +11,9 @@ import click
 import colorama
 
 try:
-    from PySide6 import QtCore, QtGui, QtWidgets
-except ImportError:
     from PySide2 import QtCore, QtGui, QtWidgets
+except ImportError:
+    from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore [no-redef]
 
 from .. import args, errors
 from ..document import Document

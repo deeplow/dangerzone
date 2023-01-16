@@ -11,9 +11,9 @@ from typing import List, Optional
 from colorama import Fore, Style
 
 try:
-    from PySide6 import QtCore, QtGui, QtWidgets
-except ImportError:
     from PySide2 import QtCore, QtGui, QtWidgets
+except ImportError:
+    from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore [no-redef]
 
 from .. import container, errors
 from ..container import convert
