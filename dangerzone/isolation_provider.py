@@ -79,7 +79,7 @@ class Container(IsolationProvider):
     def __init__(self) -> None:
         pass
 
-    def _get_runtime_name(self) -> str:
+    def get_runtime_name(self) -> str:
         if platform.system() == "Linux":
             runtime_name = "podman"
         else:
@@ -88,7 +88,7 @@ class Container(IsolationProvider):
         return runtime_name
 
     def get_runtime(self) -> str:
-        container_tech = self._get_runtime_name()
+        container_tech = self.get_runtime_name()
         runtime = shutil.which(container_tech)
         if runtime is None:
             raise NoContainerTechException(container_tech)
@@ -98,7 +98,7 @@ class Container(IsolationProvider):
         """
         Make sure the podman container is installed. Linux only.
         """
-        if self._is_container_installed():
+        if self.is_container_installed():
             return True
 
         # Load the container into podman
@@ -122,14 +122,14 @@ class Container(IsolationProvider):
                     break
         p.communicate()
 
-        if not self._is_container_installed():
+        if not self.is_container_installed():
             log.error("Failed to install the container image")
             return False
 
         log.info("Container image installed")
         return True
 
-    def _is_container_installed(self) -> bool:
+    def is_container_installed(self) -> bool:
         """
         See if the podman container is installed. Linux only.
         """
@@ -170,7 +170,7 @@ class Container(IsolationProvider):
 
         return installed
 
-    def _parse_progress(self, document: Document, line: str) -> Tuple[bool, str, int]:
+    def parse_progress(self, document: Document, line: str) -> Tuple[bool, str, int]:
         """
         Parses a line returned by the container.
         """
@@ -192,7 +192,7 @@ class Container(IsolationProvider):
 
         return (status["error"], status["text"], status["percentage"])
 
-    def _exec(
+    def exec(
         self,
         document: Document,
         args: List[str],
@@ -212,14 +212,14 @@ class Container(IsolationProvider):
         ) as p:
             if p.stdout is not None:
                 for line in p.stdout:
-                    (error, text, percentage) = self._parse_progress(document, line)
+                    (error, text, percentage) = self.parse_progress(document, line)
                     if stdout_callback:
                         stdout_callback(error, text, percentage)
 
             p.communicate()
             return p.returncode
 
-    def _exec_container(
+    def exec_container(
         self,
         document: Document,
         command: List[str],
@@ -228,7 +228,7 @@ class Container(IsolationProvider):
     ) -> int:
         container_runtime = self.get_runtime()
 
-        if self._get_runtime_name() == "podman":
+        if self.get_runtime_name() == "podman":
             platform_args = []
             security_args = ["--security-opt", "no-new-privileges"]
             security_args += ["--userns", "keep-id"]
@@ -254,7 +254,7 @@ class Container(IsolationProvider):
         )
 
         args = [container_runtime] + args
-        return self._exec(document, args, stdout_callback)
+        return self.exec(document, args, stdout_callback)
 
     def _convert(
         self,
@@ -290,7 +290,7 @@ class Container(IsolationProvider):
             "-v",
             f"{pixel_dir}:/dangerzone",
         ]
-        ret = self._exec_container(document, command, extra_args, stdout_callback)
+        ret = self.exec_container(document, command, extra_args, stdout_callback)
         if ret != 0:
             log.error("documents-to-pixels failed")
         else:
@@ -312,7 +312,7 @@ class Container(IsolationProvider):
                 "-e",
                 f"OCR_LANGUAGE={ocr_lang}",
             ]
-            ret = self._exec_container(document, command, extra_args, stdout_callback)
+            ret = self.exec_container(document, command, extra_args, stdout_callback)
             if ret != 0:
                 log.error("pixels-to-pdf failed")
             else:
@@ -346,7 +346,7 @@ class Container(IsolationProvider):
             if cpu_count is not None:
                 n_cpu = cpu_count
 
-        elif self._get_runtime_name() == "docker":
+        elif self.get_runtime_name() == "docker":
             # For Windows and MacOS containers run in VM
             # So we obtain the CPU count for the VM
             n_cpu_str = subprocess.check_output(
