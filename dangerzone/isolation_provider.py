@@ -66,9 +66,22 @@ class IsolationProvider(ABC):
     ) -> bool:
         pass
 
+    def print_progress(
+        self, document: Document, error: bool, text: str, percentage: float
+    ) -> None:
+        s = Style.BRIGHT + Fore.YELLOW + f"[doc {document.id}] "
+        s += Fore.CYAN + f"{percentage}% "
+        if error:
+            s += Style.RESET_ALL + Fore.RED + text
+            log.error(s)
+        else:
+            s += Style.RESET_ALL + text
+            log.info(s)
+
     @abstractmethod
     def get_max_parallel_conversions(self) -> int:
         pass
+
 
 
 class Container(IsolationProvider):
@@ -181,15 +194,7 @@ class Container(IsolationProvider):
             log.error(error_message)
             return (True, error_message, -1)
 
-        s = Style.BRIGHT + Fore.YELLOW + f"[doc {document.id}] "
-        s += Fore.CYAN + f"{status['percentage']}% "
-        if status["error"]:
-            s += Style.RESET_ALL + Fore.RED + status["text"]
-            log.error(s)
-        else:
-            s += Style.RESET_ALL + status["text"]
-            log.info(s)
-
+        self.print_progress(document, status["error"], status["text"], status["percentage"])
         return (status["error"], status["text"], status["percentage"])
 
     def exec(
@@ -404,7 +409,7 @@ class Dummy(IsolationProvider):
         ]
 
         for (error, text, percentage) in progress:
-            self._print_progress(document, error, text, percentage)  # type: ignore [arg-type]
+            self.print_progress(document, error, text, percentage)  # type: ignore [arg-type]
             if stdout_callback:
                 stdout_callback(error, text, percentage)
             if error:
@@ -412,18 +417,6 @@ class Dummy(IsolationProvider):
             time.sleep(0.2)
 
         return success
-
-    def _print_progress(
-        self, document: Document, error: bool, text: str, percentage: float
-    ) -> None:
-        s = Style.BRIGHT + Fore.YELLOW + f"[doc {document.id}] "
-        s += Fore.CYAN + f"{percentage}% "
-        if error:
-            s += Style.RESET_ALL + Fore.RED + text
-            log.error(s)
-        else:
-            s += Style.RESET_ALL + text
-            log.info(s)
 
     def get_max_parallel_conversions(self) -> int:
         return 1
