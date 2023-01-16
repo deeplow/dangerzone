@@ -83,7 +83,6 @@ class IsolationProvider(ABC):
         pass
 
 
-
 class Container(IsolationProvider):
 
     # Name of the dangerzone container
@@ -194,7 +193,9 @@ class Container(IsolationProvider):
             log.error(error_message)
             return (True, error_message, -1)
 
-        self.print_progress(document, status["error"], status["text"], status["percentage"])
+        self.print_progress(
+            document, status["error"], status["text"], status["percentage"]
+        )
         return (status["error"], status["text"], status["percentage"])
 
     def exec(
