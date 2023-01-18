@@ -19,7 +19,7 @@ jobs:
       - run: pip install poetry
       - run: poetry install
       - name: Run CLI tests
-        run: poetry run pytest -v
+        run: poetry run make test
 
   macOS:
     runs-on: macos-latest
@@ -33,4 +33,4 @@ jobs:
       - run: pip install poetry
       - run: poetry install
       - name: Run CLI tests
-        run: poetry run pytest -v
+        run: poetry run make test
