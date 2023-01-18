@@ -11,8 +11,10 @@ from typing import List, Optional
 from colorama import Fore, Style
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from .. import errors, isolation_provider
+from .. import errors
 from ..document import SAFE_EXTENSION, Document
+from ..isolation_provider.container import Container, NoContainerTechException
+from ..isolation_provider.dummy import Dummy
 from ..util import get_resource_path, get_subprocess_startupinfo, get_version
 from .logic import Alert, DangerzoneGui
 
@@ -55,12 +57,12 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addWidget(header_version_label)
         header_layout.addStretch()
 
-        if isinstance(self.dangerzone.isolation_provider, isolation_provider.Container):
+        if isinstance(self.dangerzone.isolation_provider, Container):
             # Waiting widget replaces content widget while container runtime isn't available
             self.waiting_widget: WaitingWidget = WaitingWidgetContainer(self.dangerzone)
             self.waiting_widget.finished.connect(self.waiting_finished)
 
-        elif isinstance(self.dangerzone.isolation_provider, isolation_provider.Dummy):
+        elif isinstance(self.dangerzone.isolation_provider, Dummy):
             # Don't wait with dummy converter
             self.waiting_widget = WaitingWidget()
             self.dangerzone.is_waiting_finished = True
@@ -181,10 +183,10 @@ class WaitingWidgetContainer(WaitingWidget):
 
         try:
             if isinstance(  # Sanity check
-                self.dangerzone.isolation_provider, isolation_provider.Container
+                self.dangerzone.isolation_provider, Container
             ):
                 container_runtime = self.dangerzone.isolation_provider.get_runtime()
-        except isolation_provider.NoContainerTechException as e:
+        except NoContainerTechException as e:
             log.error(str(e))
             state = "not_installed"
 

@@ -11,8 +11,10 @@ import click
 import colorama
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from .. import args, errors, isolation_provider
+from .. import args, errors
 from ..document import Document
+from ..isolation_provider.container import Container
+from ..isolation_provider.dummy import Dummy
 from ..util import get_resource_path, get_version
 from .logic import DangerzoneGui
 from .main_window import MainWindow
@@ -79,10 +81,10 @@ def gui_main(dummy_conversion: bool, filenames: Optional[List[str]]) -> bool:
 
     # Common objects
     if getattr(sys, "dangerzone_dev", False) and dummy_conversion:
-        dummy = isolation_provider.Dummy()
+        dummy = Dummy()
         dangerzone = DangerzoneGui(app, isolation_provider=dummy)
     else:
-        container = isolation_provider.Container()
+        container = Container()
         dangerzone = DangerzoneGui(app, isolation_provider=container)
 
     # Allow Ctrl-C to smoothly quit the program instead of throwing an exception

@@ -5,8 +5,10 @@ from typing import Any, Callable, List, Optional, TypeVar
 import click
 from colorama import Back, Fore, Style
 
-from . import args, errors, isolation_provider
+from . import args, errors
 from .document import ARCHIVE_SUBDIR, SAFE_EXTENSION
+from .isolation_provider.container import Container
+from .isolation_provider.dummy import Dummy
 from .logic import DangerzoneCore
 from .util import get_version
 
@@ -53,9 +55,9 @@ def cli_main(
     setup_logging()
 
     if getattr(sys, "dangerzone_dev", False) and dummy_conversion:
-        dangerzone = DangerzoneCore(isolation_provider.Dummy())
+        dangerzone = DangerzoneCore(Dummy())
     else:
-        dangerzone = DangerzoneCore(isolation_provider.Container())
+        dangerzone = DangerzoneCore(Container())
 
     display_banner()
     if len(filenames) == 1 and output_filename:
