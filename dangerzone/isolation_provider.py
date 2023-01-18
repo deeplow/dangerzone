@@ -417,6 +417,11 @@ class Dummy(IsolationProvider):
                 success = False
             time.sleep(0.2)
 
+        if success:
+            shutil.copy(
+                get_resource_path("dummy_document.pdf"), document.output_filename
+            )
+
         return success
 
     def get_max_parallel_conversions(self) -> int:
