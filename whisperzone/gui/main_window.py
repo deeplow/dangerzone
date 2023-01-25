@@ -45,7 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         header_label.setFont(self.dangerzone.fixed_font)
         header_label.setStyleSheet("QLabel { font-weight: bold; font-size: 50px; }")
         header_version_label = QtWidgets.QLabel(get_version())
-        header_version_label.setProperty("class", "version")  # type: ignore [arg-type]
+        header_version_label.setProperty("class", "version")
         header_version_label.setAlignment(QtCore.Qt.AlignBottom)
 
         header_layout = QtWidgets.QHBoxLayout()
@@ -308,7 +308,7 @@ class SettingsWidget(QtWidgets.QWidget):
         self.docs_selected_label = QtWidgets.QLabel("No documents selected")
         self.docs_selected_label.setAlignment(QtCore.Qt.AlignCenter)
         self.docs_selected_label.setContentsMargins(0, 0, 0, 20)
-        self.docs_selected_label.setProperty("class", "docs-selection")  # type: ignore [arg-type]
+        self.docs_selected_label.setProperty("class", "docs-selection")
 
         # Interview language
         self.lang_label = QtWidgets.QLabel("Language")
