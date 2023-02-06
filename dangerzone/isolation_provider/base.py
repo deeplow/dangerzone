@@ -35,10 +35,14 @@ class IsolationProvider(ABC):
             )
         if success:
             document.mark_as_safe()
+            with open(f"{document.input_filename}.log", 'a') as f:
+                f.write("RESULT: SAFE")
             if document.archive_after_conversion:
                 document.archive()
         else:
             document.mark_as_failed()
+            with open(f"{document.input_filename}.log", 'a') as f:
+                f.write("RESULT: FAILED")
 
     @abstractmethod
     def _convert(

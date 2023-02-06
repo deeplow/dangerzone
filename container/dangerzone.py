@@ -49,8 +49,8 @@ async def read_stream(sr: asyncio.StreamReader, callback: Callable = None) -> by
             break
         if callback is not None:
             callback(line)
-        # TODO: This would be a good place to log the received line, mostly for debug
-        # logging.
+        if line.decode().rstrip() != "":
+            print(line.decode().rstrip())
         buf += line
     return buf
 
@@ -258,7 +258,13 @@ class DangerzoneConverter:
                 num_pages = int(num_pages_str)
                 page = int(page_str)
             except ValueError as e:
-                raise RuntimeError("Conversion from PDF to PPM failed") from e
+                if line.decode().startswith("Syntax Warning") or \
+                   line.decode().startswith("Syntax Error"):
+                    # Ignore syntax warnings and errors.
+                    # pdftoppm produces a valid document regardless of these errors
+                    return
+                else:
+                    raise RuntimeError("Conversion from PDF to PPM failed") from e
 
             percentage_per_page = 45.0 / num_pages
             self.percentage += percentage_per_page

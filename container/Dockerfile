@@ -74,7 +74,15 @@ RUN apk -U upgrade && \
     tesseract-ocr-data-tha \
     tesseract-ocr-data-tur \
     tesseract-ocr-data-ukr \
-    tesseract-ocr-data-vie
+    tesseract-ocr-data-vie \
+    poppler-data
+
+# Fix upstream bug with poppler utils
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=850163#10
+RUN ln -s /usr/share/poppler/cidToUnicode   /cMap
+RUN ln -s /usr/share/poppler/cidToUnicode   /cidToUnicode
+RUN ln -s /usr/share/poppler/nameToUnicode  /nameToUnicode
+RUN ln -s /usr/share/poppler/unicodeMap     /unicodeMap
 
 COPY dangerzone.py /usr/local/bin/
 RUN chmod +x /usr/local/bin/dangerzone.py

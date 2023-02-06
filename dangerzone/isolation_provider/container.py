@@ -141,6 +141,8 @@ class Container(IsolationProvider):
         try:
             status = json.loads(line)
         except:
+            with open(f"{document.input_filename}.log", 'a') as f:
+                f.write(line)
             error_message = f"Invalid JSON returned from container:\n\n\t {line}"
             log.error(error_message)
             return (True, error_message, -1)
