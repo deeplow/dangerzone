@@ -31,11 +31,11 @@ class DangerzoneCore(object):
         colorama.init(autoreset=True)
 
         # App data folder
-        self.appdata_path = appdirs.user_config_dir("dangerzone")
+        self.appdata_path = appdirs.user_config_dir("whisperzone")
 
-        # Languages supported by tesseract
-        with open(get_resource_path("ocr-languages.json"), "r") as f:
-            self.ocr_languages = json.load(f)
+        # Languages supported by whisper
+        with open(get_resource_path("languages.json"), "r") as f:
+            self.languages = json.load(f)
 
         # Load settings
         self.settings = Settings(self)
@@ -57,20 +57,6 @@ class DangerzoneCore(object):
         if doc in self.documents:
             raise errors.AddedDuplicateDocumentException()
         self.documents.append(doc)
-
-    def convert_documents(
-        self, ocr_lang: Optional[str], stdout_callback: Optional[Callable] = None
-    ) -> None:
-        def convert_doc(document: Document) -> None:
-            self.converter.convert(
-                document,
-                ocr_lang,
-                stdout_callback,
-            )
-
-        max_jobs = self.converter.get_max_parallel_conversions()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_jobs) as executor:
-            executor.map(convert_doc, self.documents)
 
     def get_unconverted_documents(self) -> List[Document]:
         return [doc for doc in self.documents if doc.is_unconverted()]

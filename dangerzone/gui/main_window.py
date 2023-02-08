@@ -310,15 +310,15 @@ class SettingsWidget(QtWidgets.QWidget):
         self.docs_selected_label.setContentsMargins(0, 0, 0, 20)
         self.docs_selected_label.setProperty("class", "docs-selection")  # type: ignore [arg-type]
 
-        # OCR document
-        self.ocr_checkbox = QtWidgets.QCheckBox("OCR document, language")
-        self.ocr_combobox = QtWidgets.QComboBox()
-        for k in self.dangerzone.ocr_languages:
-            self.ocr_combobox.addItem(k, self.dangerzone.ocr_languages[k])
-        ocr_layout = QtWidgets.QHBoxLayout()
-        ocr_layout.addWidget(self.ocr_checkbox)
-        ocr_layout.addWidget(self.ocr_combobox)
-        ocr_layout.addStretch()
+        # Interview language
+        self.lang_label = QtWidgets.QLabel("Language")
+        self.lang_combobox = QtWidgets.QComboBox()
+        for k in self.dangerzone.languages:
+            self.lang_combobox.addItem(k, self.dangerzone.languages[k])
+        lang_layout = QtWidgets.QHBoxLayout()
+        lang_layout.addWidget(self.lang_label)
+        lang_layout.addWidget(self.lang_combobox)
+        lang_layout.addStretch()
 
         # Button
         self.start_button = QtWidgets.QPushButton()
@@ -333,21 +333,16 @@ class SettingsWidget(QtWidgets.QWidget):
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addLayout(ocr_layout)
+        layout.addLayout(lang_layout)
         layout.addSpacing(20)
         layout.addLayout(button_layout)
         layout.addStretch()
         self.setLayout(layout)
 
         # Load values from settings
-        if self.dangerzone.settings.get("ocr"):
-            self.ocr_checkbox.setCheckState(QtCore.Qt.Checked)
-        else:
-            self.ocr_checkbox.setCheckState(QtCore.Qt.Unchecked)
-
-        index = self.ocr_combobox.findText(self.dangerzone.settings.get("ocr_language"))
+        index = self.lang_combobox.findText(self.dangerzone.settings.get("language"))
         if index != -1:
-            self.ocr_combobox.setCurrentIndex(index)
+            self.lang_combobox.setCurrentIndex(index)
 
     def update_ui(self) -> None:
         pass
@@ -369,10 +364,8 @@ class SettingsWidget(QtWidgets.QWidget):
 
     def start_button_clicked(self) -> None:
         # Update settings
-        self.dangerzone.settings.set(
-            "ocr", self.ocr_checkbox.checkState() == QtCore.Qt.Checked
-        )
-        self.dangerzone.settings.set("ocr_language", self.ocr_combobox.currentText())
+        self.dangerzone.settings.set("language", self.lang_combobox.currentText())
+        self.dangerzone.settings.save()
 
         # Start!
         self.start_clicked.emit()
@@ -386,18 +379,18 @@ class ConvertTask(QtCore.QObject):
         self,
         dangerzone: DangerzoneGui,
         document: Document,
-        ocr_lang: str = None,
+        language: str = None,
     ) -> None:
         super(ConvertTask, self).__init__()
         self.document = document
-        self.ocr_lang = ocr_lang
+        self.language = language
         self.error = False
         self.dangerzone = dangerzone
 
     def convert_document(self) -> None:
         self.dangerzone.converter.convert(
             self.document,
-            self.ocr_lang,
+            self.language,
             self.stdout_callback,
         )
         self.finished.emit(self.error)
@@ -435,19 +428,17 @@ class DocumentsListWidget(QtWidgets.QListWidget):
 
         for doc_widget in self.document_widgets:
             task = ConvertTask(
-                self.dangerzone, doc_widget.document, self.get_ocr_lang()
+                self.dangerzone, doc_widget.document, self.get_language()
             )
             task.update.connect(doc_widget.update_progress)
             task.finished.connect(doc_widget.all_done)
             self.thread_pool.apply_async(task.convert_document)
 
-    def get_ocr_lang(self) -> Optional[str]:
-        ocr_lang = None
-        if self.dangerzone.settings.get("ocr"):
-            ocr_lang = self.dangerzone.ocr_languages[
-                self.dangerzone.settings.get("ocr_language")
-            ]
-        return ocr_lang
+    def get_language(self) -> Optional[str]:
+        language = self.dangerzone.languages[
+            self.dangerzone.settings.get("language")
+        ]
+        return language
 
 
 class DocumentWidget(QtWidgets.QWidget):
@@ -532,10 +523,6 @@ class DocumentWidget(QtWidgets.QWidget):
 
         if self.error:
             return
-
-        # Open
-        if self.dangerzone.settings.get("open"):
-            self.dangerzone.open_pdf_viewer(self.document.output_filename)
 
 
 class QLabelClickable(QtWidgets.QLabel):

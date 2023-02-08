@@ -8,6 +8,7 @@ import sys
 import time
 from datetime import datetime
 from typing import Callable, Optional, Tuple
+import pipes
 
 from colorama import Fore, Style
 
@@ -30,18 +31,24 @@ class Converter:
     def transcribe(
         self,
         document: Document,
-        ocr_lang: str,
+        language: str,
         stdout_callback: Optional[Callable] = None,
+        model="base",
     ) -> bool:
-        with subprocess.Popen(
-            [
+
+        args = [
                 "whisper",
                 document.input_filename,
                 "--language",
-                "English",
+                language,
                 "--model",
-                "tiny.en",
-            ],
+                model,
+            ]
+        args_str = " ".join(pipes.quote(s) for s in args)
+        log.info("> " + args_str)
+
+        with subprocess.Popen(
+            args,
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -65,10 +72,12 @@ class Converter:
     def convert(
         self,
         document: Document,
-        ocr_lang: Optional[str],
+        language: Optional[str],
         stdout_callback: Optional[Callable] = None,
     ) -> None:
         document.mark_as_converting()
+
+        log.debug(f"transcribing {os.path.basename(document.input_filename)} in {language}")
 
         # Get max num minutes
         args = [
@@ -90,7 +99,7 @@ class Converter:
         self.duration = (end_time - self.start_time).seconds
 
         try:
-            success = self.transcribe(document, ocr_lang, stdout_callback)
+            success = self.transcribe(document, language, stdout_callback)
         except Exception:
             success = False
             log.exception(

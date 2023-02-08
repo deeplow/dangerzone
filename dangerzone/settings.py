@@ -20,13 +20,7 @@ class Settings:
             self.dangerzone.appdata_path, "settings.json"
         )
         self.default_settings: Dict[str, Any] = {
-            "save": True,
-            "archive": True,
-            "ocr": True,
-            "ocr_language": "English",
-            "open": True,
-            "open_app": None,
-            "safe_extension": SAFE_EXTENSION,
+            "language": "English",
         }
 
         self.load()
