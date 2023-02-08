@@ -1,0 +1,7 @@
+{
+    "fastest": "tiny",
+    "fast": "base",
+    "normal": "small",
+    "slow": "medium",
+    "slowest": "large"
+}

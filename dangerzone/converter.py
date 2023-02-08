@@ -32,8 +32,9 @@ class Converter:
         self,
         document: Document,
         language: str,
+        model: str,
+        output_format: str,
         stdout_callback: Optional[Callable] = None,
-        model="base",
     ) -> bool:
 
         args = [
@@ -43,6 +44,8 @@ class Converter:
                 language,
                 "--model",
                 model,
+                "--output_format",
+                output_format
             ]
         args_str = " ".join(pipes.quote(s) for s in args)
         log.info("> " + args_str)
@@ -72,7 +75,9 @@ class Converter:
     def convert(
         self,
         document: Document,
-        language: Optional[str],
+        language: str,
+        model: str,
+        output_format: str,
         stdout_callback: Optional[Callable] = None,
     ) -> None:
         document.mark_as_converting()
@@ -99,7 +104,7 @@ class Converter:
         self.duration = (end_time - self.start_time).seconds
 
         try:
-            success = self.transcribe(document, language, stdout_callback)
+            success = self.transcribe(document, language, model, output_format, stdout_callback)
         except Exception:
             success = False
             log.exception(

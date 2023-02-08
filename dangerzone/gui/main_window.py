@@ -320,6 +320,26 @@ class SettingsWidget(QtWidgets.QWidget):
         lang_layout.addWidget(self.lang_combobox)
         lang_layout.addStretch()
 
+        # Model
+        self.model_label = QtWidgets.QLabel("Speed")
+        self.model_combobox = QtWidgets.QComboBox()
+        for k in self.dangerzone.models:
+            self.model_combobox.addItem(k, self.dangerzone.models[k])
+        model_layout = QtWidgets.QHBoxLayout()
+        model_layout.addWidget(self.model_label)
+        model_layout.addWidget(self.model_combobox)
+        model_layout.addStretch()
+
+        # Output format
+        self.output_format_label = QtWidgets.QLabel("Save as")
+        self.output_format_combobox = QtWidgets.QComboBox()
+        for k in ["txt", "vtt", "srt", "tsv", "json", "all"]:
+            self.output_format_combobox.addItem(k, k)
+        output_format_layout = QtWidgets.QHBoxLayout()
+        output_format_layout.addWidget(self.output_format_label)
+        output_format_layout.addWidget(self.output_format_combobox)
+        output_format_layout.addStretch()
+
         # Button
         self.start_button = QtWidgets.QPushButton()
         self.start_button.clicked.connect(self.start_button_clicked)
@@ -334,6 +354,9 @@ class SettingsWidget(QtWidgets.QWidget):
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(lang_layout)
+        layout.addLayout(model_layout)
+        layout.addLayout(output_format_layout)
+
         layout.addSpacing(20)
         layout.addLayout(button_layout)
         layout.addStretch()
@@ -343,6 +366,12 @@ class SettingsWidget(QtWidgets.QWidget):
         index = self.lang_combobox.findText(self.dangerzone.settings.get("language"))
         if index != -1:
             self.lang_combobox.setCurrentIndex(index)
+        index = self.model_combobox.findText(self.dangerzone.settings.get("model"))
+        if index != -1:
+            self.model_combobox.setCurrentIndex(index)
+        index = self.output_format_combobox.findText(self.dangerzone.settings.get("output_format"))
+        if index != -1:
+            self.output_format_combobox.setCurrentIndex(index)
 
     def update_ui(self) -> None:
         pass
@@ -365,6 +394,8 @@ class SettingsWidget(QtWidgets.QWidget):
     def start_button_clicked(self) -> None:
         # Update settings
         self.dangerzone.settings.set("language", self.lang_combobox.currentText())
+        self.dangerzone.settings.set("model", self.model_combobox.currentText())
+        self.dangerzone.settings.set("output_format", self.output_format_combobox.currentText())
         self.dangerzone.settings.save()
 
         # Start!
@@ -379,11 +410,15 @@ class ConvertTask(QtCore.QObject):
         self,
         dangerzone: DangerzoneGui,
         document: Document,
-        language: str = None,
+        language: str,
+        model: str,
+        output_format: str,
     ) -> None:
         super(ConvertTask, self).__init__()
         self.document = document
         self.language = language
+        self.model = model
+        self.output_format = output_format
         self.error = False
         self.dangerzone = dangerzone
 
@@ -391,6 +426,8 @@ class ConvertTask(QtCore.QObject):
         self.dangerzone.converter.convert(
             self.document,
             self.language,
+            self.model,
+            self.output_format,
             self.stdout_callback,
         )
         self.finished.emit(self.error)
@@ -428,7 +465,7 @@ class DocumentsListWidget(QtWidgets.QListWidget):
 
         for doc_widget in self.document_widgets:
             task = ConvertTask(
-                self.dangerzone, doc_widget.document, self.get_language()
+                self.dangerzone, doc_widget.document, self.get_language(), self.get_model(), self.get_output_format()
             )
             task.update.connect(doc_widget.update_progress)
             task.finished.connect(doc_widget.all_done)
@@ -439,6 +476,15 @@ class DocumentsListWidget(QtWidgets.QListWidget):
             self.dangerzone.settings.get("language")
         ]
         return language
+
+    def get_model(self) -> Optional[str]:
+        model = self.dangerzone.models[
+            self.dangerzone.settings.get("model")
+        ]
+        return model
+
+    def get_output_format(self) -> Optional[str]:
+        return self.dangerzone.settings.get("output_format")
 
 
 class DocumentWidget(QtWidgets.QWidget):

@@ -37,6 +37,10 @@ class DangerzoneCore(object):
         with open(get_resource_path("languages.json"), "r") as f:
             self.languages = json.load(f)
 
+        # Models provided by whisper
+        with open(get_resource_path("models.json"), "r") as f:
+            self.models = json.load(f)
+
         # Load settings
         self.settings = Settings(self)
 
