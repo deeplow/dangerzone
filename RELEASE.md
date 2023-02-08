@@ -1,6 +1,6 @@
 # Release instructions
 
-This section documents the release process. Unless you're a dangerzone developer making a release, you'll probably never need to follow it.
+This section documents the release process. Unless you're a whisperzone developer making a release, you'll probably never need to follow it.
 
 
 ## Changelog, version, and signed git tag
@@ -11,7 +11,7 @@ Before making a release, all of these should be complete:
 - [ ] Update `share/version.txt`
 - [ ] Update version and download links in `README.md`, and screenshot if necessary
 - [ ] CHANGELOG.md should be updated to include a list of all major changes since the last release
-- [ ] There must be a PGP-signed git tag for the version, e.g. for dangerzone 0.1.0, the tag must be `v0.1.0`
+- [ ] There must be a PGP-signed git tag for the version, e.g. for whisperzone 0.1.0, the tag must be `v0.1.0`
 
 Before making a release, verify the release git tag:
 
@@ -35,19 +35,19 @@ To make a macOS release, go to macOS build machine:
   - Apple-trusted `Developer ID Application: FIRST LOOK PRODUCTIONS, INC. (P24U45L8P5)` code-signing certificates installed
 - Verify and checkout the git tag for this release
 - Run `poetry install`
-- Run `poetry run ./install/macos/build-app.py --with-codesign`; this will make `dist/Dangerzone.dmg`
-- Notarize it: `xcrun altool --notarize-app --primary-bundle-id "media.firstlook.dangerzone" -u "micah@firstlook.org" -p "$PASSWORD" --file dist/Dangerzone.dmg`
+- Run `poetry run ./install/macos/build-app.py --with-codesign`; this will make `dist/Whisperzone.dmg`
+- Notarize it: `xcrun altool --notarize-app --primary-bundle-id "media.firstlook.whisperzone" -u "micah@firstlook.org" -p "$PASSWORD" --file dist/Whisperzone.dmg`
 - Wait for it to get approved, check status with: `xcrun altool --notarization-history 0 -u "micah@firstlook.org" -p "$PASSWORD"`
 - (If it gets rejected, you can see why with: `xcrun altool --notarization-info $REQUEST_UUID -u "micah@firstlook.org" -p "$PASSWORD"`)
-- After it's approved, staple the ticket: `xcrun stapler staple dist/Dangerzone.dmg`
+- After it's approved, staple the ticket: `xcrun stapler staple dist/Whisperzone.dmg`
 
 This process ends up with the final file:
 
 ```
-dist/Dangerzone.dmg
+dist/Whisperzone.dmg
 ```
 
-Rename `Dangerzone.dmg` to `Dangerzone-$VERSION.dmg`.
+Rename `Whisperzone.dmg` to `Whisperzone-$VERSION.dmg`.
 
 ## Windows release
 
@@ -55,7 +55,7 @@ Rename `Dangerzone.dmg` to `Dangerzone-$VERSION.dmg`.
 
 - Download a VirtualBox VM image for Windows from here: https://developer.microsoft.com/en-us/windows/downloads/virtual-machines/ and import it into VirtualBox. Also install the Oracle VM VirtualBox Extension Pack.
 - Install updates
-- Install git for Windows from https://git-scm.com/download/win, and clone the dangerzone repo
+- Install git for Windows from https://git-scm.com/download/win, and clone the whisperzone repo
 - Follow the Windows build instructions in `BUILD.md`, except:
   - Don't install Docker Desktop (it won't work without nested virtualization)
   - Install the Windows SDK from here: https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/ and add `C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool` to the path (you'll need it for `signtool.exe`)
@@ -65,14 +65,14 @@ Rename `Dangerzone.dmg` to `Dangerzone-$VERSION.dmg`.
 
 Instead of running `python .\install\windows\build-image.py` in the VM, run the build image script on the host (making sure to build for `linux/amd64`). Copy `share/container.tar.gz` and `share/image-id.txt` from the host into the `share` folder in the VM
 
-### Build the Dangerzone binary and installer
+### Build the Whisperzone binary and installer
 
 - Verify and checkout the git tag for this release
 - Run `poetry install`
 - Run `poetry run .\install\windows\build-app.bat`
-- When you're done you will have `dist\Dangerzone.msi`
+- When you're done you will have `dist\Whisperzone.msi`
 
-Rename `Dangerzone.msi` to `Dangerzone-$VERSION.msi`.
+Rename `Whisperzone.msi` to `Whisperzone-$VERSION.msi`.
 
 ## Linux release
 
@@ -83,7 +83,7 @@ Linux binaries are automatically built and deployed to repositories when a new t
 To publish the release:
 
 - Create a new release on GitHub, put the changelog in the description of the release, and upload the macOS and Windows installers
-- Update the [Installing Dangerzone](INSTALL.md) page
-- Update the [Dangerzone website](https://github.com/freedomofpress/dangerzone.rocks) to link to the new installers
-- Update the brew cask release of Dangerzone with a [PR like this one](https://github.com/Homebrew/homebrew-cask/pull/116319)
-- Toot release announcement on our mastodon account @dangerzone@fosstodon.org
+- Update the [Installing Whisperzone](INSTALL.md) page
+- Update the [Whisperzone website](https://github.com/freedomofpress/whisperzone.rocks) to link to the new installers
+- Update the brew cask release of Whisperzone with a [PR like this one](https://github.com/Homebrew/homebrew-cask/pull/116319)
+- Toot release announcement on our mastodon account @whisperzone@fosstodon.org
