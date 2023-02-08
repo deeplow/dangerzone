@@ -12,6 +12,7 @@ appdirs = "*"
 PySide2 = "5.15.2.1"
 colorama = "*"
 pyxdg = {version = "*", platform = "linux"}
+openai-whisper = "^20230124"
 
 [tool.poetry.scripts]
 dangerzone = 'dangerzone:main'
