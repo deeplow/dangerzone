@@ -5,8 +5,8 @@ import platform
 import shutil
 import subprocess
 import tempfile
-from abc import abstractmethod
 import typing
+from abc import abstractmethod
 from multiprocessing.pool import ThreadPool
 from typing import List, Optional
 
@@ -89,7 +89,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def waiting_finished(self) -> None:
-        self.dangerzone.is_waiting_finished = True
         self.waiting_widget.hide()
         self.content_widget.show()
 
@@ -378,7 +377,9 @@ class SettingsWidget(QtWidgets.QWidget):
         index = self.model_combobox.findText(self.dangerzone.settings.get("model"))
         if index != -1:
             self.model_combobox.setCurrentIndex(index)
-        index = self.output_format_combobox.findText(self.dangerzone.settings.get("output_format"))
+        index = self.output_format_combobox.findText(
+            self.dangerzone.settings.get("output_format")
+        )
         if index != -1:
             self.output_format_combobox.setCurrentIndex(index)
 
@@ -404,7 +405,9 @@ class SettingsWidget(QtWidgets.QWidget):
         # Update settings
         self.dangerzone.settings.set("language", self.lang_combobox.currentText())
         self.dangerzone.settings.set("model", self.model_combobox.currentText())
-        self.dangerzone.settings.set("output_format", self.output_format_combobox.currentText())
+        self.dangerzone.settings.set(
+            "output_format", self.output_format_combobox.currentText()
+        )
         self.dangerzone.settings.save()
 
         # Start!
@@ -419,9 +422,9 @@ class ConvertTask(QtCore.QObject):
         self,
         dangerzone: DangerzoneGui,
         document: Document,
-        language: str,
-        model: str,
-        output_format: str,
+        language: Optional[str],
+        model: Optional[str],
+        output_format: Optional[str],
     ) -> None:
         super(ConvertTask, self).__init__()
         self.document = document
@@ -471,22 +474,22 @@ class DocumentsListWidget(QtWidgets.QListWidget):
 
         for doc_widget in self.document_widgets:
             task = ConvertTask(
-                self.dangerzone, doc_widget.document, self.get_language(), self.get_model(), self.get_output_format()
+                self.dangerzone,
+                doc_widget.document,
+                self.get_language(),
+                self.get_model(),
+                self.get_output_format(),
             )
             task.update.connect(doc_widget.update_progress)
             task.finished.connect(doc_widget.all_done)
             self.thread_pool.apply_async(task.convert_document)
 
     def get_language(self) -> Optional[str]:
-        language = self.dangerzone.languages[
-            self.dangerzone.settings.get("language")
-        ]
+        language = self.dangerzone.languages[self.dangerzone.settings.get("language")]
         return language
 
     def get_model(self) -> Optional[str]:
-        model = self.dangerzone.models[
-            self.dangerzone.settings.get("model")
-        ]
+        model = self.dangerzone.models[self.dangerzone.settings.get("model")]
         return model
 
     def get_output_format(self) -> Optional[str]:

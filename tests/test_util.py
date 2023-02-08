@@ -2,9 +2,8 @@ import platform
 import subprocess
 from pathlib import Path
 
-import pytest
-
 import dangerzone.util as util
+import pytest
 
 VERSION_FILE_NAME = "version.txt"
 

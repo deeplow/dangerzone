@@ -1,5 +1,6 @@
 import logging
 import os
+import pipes
 import platform
 import re
 import shutil
@@ -8,7 +9,6 @@ import sys
 import time
 from datetime import datetime
 from typing import Callable, Optional, Tuple
-import pipes
 
 from colorama import Fore, Style
 
@@ -38,15 +38,15 @@ class Converter:
     ) -> bool:
 
         args = [
-                "whisper",
-                document.input_filename,
-                "--language",
-                language,
-                "--model",
-                model,
-                "--output_format",
-                output_format
-            ]
+            "whisper",
+            document.input_filename,
+            "--language",
+            language,
+            "--model",
+            model,
+            "--output_format",
+            output_format,
+        ]
         args_str = " ".join(pipes.quote(s) for s in args)
         log.info("> " + args_str)
 
@@ -75,14 +75,16 @@ class Converter:
     def convert(
         self,
         document: Document,
-        language: str,
-        model: str,
-        output_format: str,
+        language: Optional[str] = "English",
+        model: Optional[str] = "small",
+        output_format: Optional[str] = "txt",
         stdout_callback: Optional[Callable] = None,
     ) -> None:
         document.mark_as_converting()
 
-        log.debug(f"transcribing {os.path.basename(document.input_filename)} in {language}")
+        log.debug(
+            f"transcribing {os.path.basename(document.input_filename)} in {language}"
+        )
 
         # Get max num minutes
         args = [
@@ -104,7 +106,9 @@ class Converter:
         self.duration = (end_time - self.start_time).seconds
 
         try:
-            success = self.transcribe(document, language, model, output_format, stdout_callback)
+            success = self.transcribe(
+                document, language, model, output_format, stdout_callback
+            )
         except Exception:
             success = False
             log.exception(
@@ -117,7 +121,9 @@ class Converter:
         else:
             document.mark_as_failed()
 
-    def parse_progress(self, document: Document, line: str) -> Tuple[bool, str, int]:
+    def parse_progress(
+        self, document: Document, line: str
+    ) -> None | Tuple[bool, str, int]:
         """
         Parses a line returned by the container.
         """

@@ -22,7 +22,7 @@ class Settings:
         self.default_settings: Dict[str, Any] = {
             "language": "English",
             "model": "base",
-            "output_format": "txt"
+            "output_format": "txt",
         }
 
         self.load()
