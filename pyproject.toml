@@ -16,7 +16,6 @@ openai-whisper = "^20230124"
 
 [tool.poetry.scripts]
 dangerzone = 'dangerzone:main'
-dangerzone-container = 'dangerzone:main'
 
 # Dependencies required for packaging the code on various platforms.
 [tool.poetry.group.package.dependencies]

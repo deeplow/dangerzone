@@ -444,9 +444,6 @@ class DocumentsListWidget(QtWidgets.QListWidget):
         super().__init__()
         self.dangerzone = dangerzone
         self.document_widgets: List[DocumentWidget] = []
-
-        # Initialize thread_pool only on the first conversion
-        # to ensure docker-daemon detection logic runs first
         self.thread_pool_initized = False
 
     def documents_added(self, new_docs: List[Document]) -> None:

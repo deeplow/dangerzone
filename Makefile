@@ -24,13 +24,10 @@ MYPY_ARGS := --ignore-missing-imports \
 mypy-host:
 	mypy $(MYPY_ARGS) whisperzone
 
-mypy-container:
-	mypy $(MYPY_ARGS) container
-
 mypy-tests:
 	mypy $(MYPY_ARGS) tests
 
-mypy: mypy-host  mypy-container mypy-tests ## check type hints with mypy
+mypy: mypy-host mypy-tests ## check type hints with mypy
 
 .PHONY: lint
 lint: lint-black lint-isort mypy ## check the code with various linters
@@ -40,7 +37,7 @@ lint-apply: lint-black-apply lint-isort-apply ## apply all the linter's suggesti
 
 .PHONY: test
 test:
-	python ./dev_scripts/pytest-wrapper.py -v --cov --ignore dev_scripts
+	python pytest -v --cov --ignore dev_scripts
 
 # Makefile self-help borrowed from the securedrop-client project
 # Explaination of the below shell command should it ever break.
