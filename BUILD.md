@@ -15,18 +15,12 @@ Install poetry (you may need to add `~/.local/bin/` to your `PATH` first):
 python3 -m pip install poetry
 ```
 
-Change to the `dangerzone` folder, and install the poetry dependencies:
+Change to the `whisperzone` folder, and install the poetry dependencies:
 
 > **Note**: due to an issue with [poetry](https://github.com/python-poetry/poetry/issues/1917), if it prompts for your keying, disable the keyring with `keyring --disable` and run the command again.
 
 ```
 poetry install
-```
-
-Build the latest container:
-
-```sh
-./install/linux/build-image.sh
 ```
 
 Run from source tree:
@@ -36,7 +30,7 @@ Run from source tree:
 poetry shell
 
 # run the GUI
-./dev_scripts/dangerzone
+./dev_scripts/whisperzone
 ```
 
 Create a .deb:
@@ -59,18 +53,12 @@ Install poetry:
 python -m pip install poetry
 ```
 
-Change to the `dangerzone` folder, and install the poetry dependencies:
+Change to the `whisperzone` folder, and install the poetry dependencies:
 
 > **Note**: due to an issue with [poetry](https://github.com/python-poetry/poetry/issues/1917), if it prompts for your keying, disable the keyring with `keyring --disable` and run the command again.
 
 ```
 poetry install
-```
-
-Build the latest container:
-
-```sh
-./install/linux/build-image.sh
 ```
 
 Run from source tree:
@@ -80,7 +68,7 @@ Run from source tree:
 poetry shell
 
 # run the GUI
-./dev_scripts/dangerzone
+./dev_scripts/whisperzone
 ```
 
 Create a .rpm:
@@ -97,8 +85,6 @@ Over time, you may need to increase disk space or prune outdated Docker images i
 
 ## macOS
 
-Install [Docker Desktop](https://www.docker.com/products/docker-desktop). Make sure to choose your correct CPU, either Intel Chip or Apple Chip.
-
 Install the latest version of Python 3.10 [from python.org](https://www.python.org/downloads/macos/), and make sure `/Library/Frameworks/Python.framework/Versions/3.10/bin` is in your `PATH`.
 
 Install Python dependencies:
@@ -114,12 +100,6 @@ Install [Homebrew](https://brew.sh/) dependencies:
 brew install create-dmg
 ```
 
-Build the dangerzone container image:
-
-```sh
-./install/macos/build-image.sh
-```
-
 Run from source tree:
 
 ```sh
@@ -127,7 +107,7 @@ Run from source tree:
 poetry shell
 
 # run the GUI
-./dev_scripts/dangerzone
+./dev_scripts/whisperzone
 ```
 
 To create an app bundle, use the `build_app.py` script:
@@ -146,10 +126,7 @@ The output is in the `dist` folder.
 
 ## Windows
 
-Install [Docker Desktop](https://www.docker.com/products/docker-desktop).
-
 Install the latest version of Python 3.10 (64-bit) [from python.org](https://www.python.org/downloads/windows/). Make sure to check the "Add Python 3.10 to PATH" checkbox on the first page of the installer.
-
 
 Install Microsoft Visual C++ 14.0 or greater. Get it with ["Microsoft C++ Build Tools"](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and make sure to select "Desktop development with C++" when installing.
 
@@ -159,26 +136,20 @@ Install [poetry](https://python-poetry.org/). Open PowerShell, and run:
 python -m pip install poetry
 ```
 
-Change to the `dangerzone` folder, and install the poetry dependencies:
+Change to the `whisperzone` folder, and install the poetry dependencies:
 
 ```
 poetry install
 ```
 
-Build the dangerzone container image:
-
-```sh
-python .\install\windows\build-image.py
-```
-
-After that you can launch dangerzone during development with:
+After that you can launch whisperzone during development with:
 
 ```
 # start a shell in the virtual environment
 poetry shell
 
 # run the GUI
-.\dev_scripts\dangerzone.bat
+.\dev_scripts\whisperzone.bat
 ```
 
 ### If you want to build the installer
@@ -193,20 +164,20 @@ You'll need a code signing certificate.
 
 ## To make a .exe
 
-Open a command prompt, cd into the dangerzone directory, and run:
+Open a command prompt, cd into the whisperzone directory, and run:
 
 ```
 poetry run python .\setup-windows.py build
 ```
 
-In `build\exe.win32-3.10\` you will find `dangerzone.exe`, `dangerzone-cli.exe`, and all supporting files.
+In `build\exe.win32-3.10\` you will find `whisperzone.exe` and all supporting files.
 
 ### To build the installer
 
-Note that you must have a codesigning certificate installed in order to use the `install\windows\build-app.bat` script, because it codesigns `dangerzone.exe`, `dangerzone-cli.exe` and `Dangerzone.msi`.
+Note that you must have a codesigning certificate installed in order to use the `install\windows\build-app.bat` script, because it codesigns `whisperzone.exe` and `Whisperzone.msi`.
 
 ```
 poetry run .\install\windows\build-app.bat
 ```
 
-When you're done you will have `dist\Dangerzone.msi`.
+When you're done you will have `dist\Whisperzone.msi`.
