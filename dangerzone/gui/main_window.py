@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 from multiprocessing.pool import ThreadPool
 from typing import List, Optional
+from abc import abstractmethod
 
 from colorama import Fore, Style
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -55,20 +56,33 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addWidget(header_version_label)
         header_layout.addStretch()
 
+        # Waiting widget replaces content widget while container runtime isn't available
+        self.waiting_widget: WaitingWidgetFFmpeg = WaitingWidgetFFmpeg(self.dangerzone)
+        self.waiting_widget.finished.connect(self.waiting_finished)
+
         # Content widget, contains all the window content
         self.content_widget = ContentWidget(self.dangerzone)
-        self.content_widget.show()
+        self.waiting_widget.show()
+        self.content_widget.hide()
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(header_layout)
+        layout.addWidget(self.waiting_widget, stretch=1)
         layout.addWidget(self.content_widget, stretch=1)
 
         central_widget = QtWidgets.QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+        self.waiting_widget.check_state()
+
         self.show()
+
+    def waiting_finished(self) -> None:
+        self.dangerzone.is_waiting_finished = True
+        self.waiting_widget.hide()
+        self.content_widget.show()
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
         alert_widget = Alert(
@@ -88,6 +102,76 @@ class MainWindow(QtWidgets.QMainWindow):
                 e.accept()
 
         self.dangerzone.app.quit()
+
+
+class WaitingWidgetAbstract(QtWidgets.QWidget):
+    finished = QtCore.Signal()
+
+    def __init__(self, dangerzone: DangerzoneGui) -> None:
+        super(WaitingWidgetAbstract, self).__init__()
+        self.dangerzone = dangerzone
+
+        self.label = QtWidgets.QLabel()
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setTextFormat(QtCore.Qt.RichText)
+        self.label.setOpenExternalLinks(True)
+        self.label.setStyleSheet("QLabel { font-size: 20px; }")
+
+        # Buttons
+        check_button = QtWidgets.QPushButton("Check Again")
+        check_button.clicked.connect(self.check_state)
+        buttons_layout = QtWidgets.QHBoxLayout()
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(check_button)
+        buttons_layout.addStretch()
+        self.buttons = QtWidgets.QWidget()
+        self.buttons.setLayout(buttons_layout)
+
+        # Layout
+        layout = QtWidgets.QVBoxLayout()
+        layout.addStretch()
+        layout.addWidget(self.label)
+        layout.addStretch()
+        layout.addWidget(self.buttons)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        # Check the state
+        self.check_state()
+
+    @abstractmethod
+    def check_state(self) -> None:
+        pass
+
+    @abstractmethod
+    def state_change(self, state: str) -> None:
+        pass
+
+
+class WaitingWidgetFFmpeg(WaitingWidgetAbstract):
+
+    def __init__(self, dangerzone: DangerzoneGui) -> None:
+        super(WaitingWidgetFFmpeg, self).__init__(dangerzone)
+
+    def check_state(self) -> None:
+        state: Optional[str] = None
+        try:
+            subprocess.run(["ffmpeg", "--help"], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+            state = "ffmpeg_installed"
+        except FileNotFoundError:
+            state = "ffmpeg_not_installed"
+
+        # Update the state
+        self.state_change(state)
+
+    def state_change(self, state: str) -> None:
+        if state == "ffmpeg_not_installed":
+            self.label.setText(
+                "<strong>Whisperzone Requires FFmpeg</strong><br><br><a href='https://ffmpeg.org/download.html#get-packages'>Download FFmpeg</a> and install it."
+            )
+            self.buttons.show()
+        elif state == "ffmpeg_installed":
+            self.finished.emit()
 
 
 class ContentWidget(QtWidgets.QWidget):
