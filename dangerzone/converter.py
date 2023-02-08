@@ -1,9 +1,13 @@
 import logging
 import os
+import platform
+import re
 import shutil
+import subprocess
 import sys
 import time
-from typing import Callable, Optional
+from datetime import datetime
+from typing import Callable, Optional, Tuple
 
 from colorama import Fore, Style
 
@@ -12,12 +16,51 @@ from .util import get_resource_path
 
 log = logging.getLogger(__name__)
 
+# Define startupinfo for subprocesses
+if platform.system() == "Windows":
+    startupinfo = subprocess.STARTUPINFO()  # type: ignore [attr-defined]
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore [attr-defined]
+else:
+    startupinfo = None
+
 
 class Converter:
     """Implements the interview transcription logic"""
 
-    def __init__(self) -> None:
-        pass
+    def transcribe(
+        self,
+        document: Document,
+        ocr_lang: str,
+        stdout_callback: Optional[Callable] = None,
+    ) -> bool:
+        with subprocess.Popen(
+            [
+                "whisper",
+                document.input_filename,
+                "--language",
+                "English",
+                "--model",
+                "tiny.en",
+            ],
+            stdin=None,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            bufsize=1,
+            universal_newlines=True,
+            startupinfo=startupinfo,
+        ) as p:
+            if p.stdout is not None:
+                for line in p.stdout:
+                    result = self.parse_progress(document, line)
+                    if result is None:
+                        continue
+                    else:
+                        (error, text, percentage) = result
+                        if stdout_callback:
+                            stdout_callback(error, text, percentage)
+
+            p.communicate()
+            return p.returncode == 0
 
     def convert(
         self,
@@ -26,8 +69,28 @@ class Converter:
         stdout_callback: Optional[Callable] = None,
     ) -> None:
         document.mark_as_converting()
+
+        # Get max num minutes
+        args = [
+            "ffmpeg",
+            "-v",
+            "quiet",
+            "-stats",
+            "-i",
+            document.input_filename,
+            "-f",
+            "null",
+            "-",
+        ]
+        p = subprocess.run(args, universal_newlines=True, capture_output=True)
+
+        max_time = p.stderr.rstrip().split("\n")[-1].split()[1][5:]
+        self.start_time = datetime.strptime("00:00.000", "%M:%S.%f")
+        end_time = datetime.strptime(max_time, "%H:%M:%S.%f")
+        self.duration = (end_time - self.start_time).seconds
+
         try:
-            success = self._convert(document, ocr_lang, stdout_callback)
+            success = self.transcribe(document, ocr_lang, stdout_callback)
         except Exception:
             success = False
             log.exception(
@@ -40,46 +103,44 @@ class Converter:
         else:
             document.mark_as_failed()
 
-    def _convert(
-        self,
-        document: Document,
-        ocr_lang: Optional[str],
-        stdout_callback: Optional[Callable] = None,
-    ) -> bool:
-        log.debug("Dummy converter started:")
-        log.debug(
-            f"  - document: {os.path.basename(document.input_filename)} ({document.id})"
+    def parse_progress(self, document: Document, line: str) -> Tuple[bool, str, int]:
+        """
+        Parses a line returned by the container.
+        """
+        # Installing model progress format
+        # 0%|                                               | 0.00/139M [00:00<?, ?iB/s]
+        # 23%|████████▊                             | 32.3M/139M [00:03<00:11, 10.0MiB/s]
+        # 100%|███████████████████████████████████████| 139M/139M [00:15<00:00, 9.36MiB/s]
+        installing_model = re.search("^\s*(\d+)%\|", line)
+
+        # Output text format
+        # [00:00.000 --> 00:06.600]  This is a Libravox recording. All Libravox recordings are in the public domain. For more information
+        # [26:03.440 --> 26:08.360]  There are wealthy gentlemen in England who drive four horse passenger coaches twenty
+        transcribing = re.search(
+            "^\[(\d+:\d\d\.\d{3}) --> (\d+:\d\d\.\d{3})\]  (.*)", line
         )
-        log.debug(f"  - ocr     : {ocr_lang}")
-        log.debug("\n(simulating conversion)")
 
-        success = True
+        if installing_model and installing_model.group(0):
+            progress = float(installing_model.group(1))
+            error = False
+            text = f"Installing model ({progress}%)"
+            percentage = progress * 0.3  # 30% of the progress is to install the model
 
-        progress = [
-            [False, "Converting to PDF using GraphicsMagick", 0.0],
-            [False, "Separating document into pages", 3.0],
-            [False, "Converting page 1/1 to pixels", 5.0],
-            [False, "Converted document to pixels", 50.0],
-            [False, "Converting page 1/1 from pixels to PDF", 50.0],
-            [False, "Merging 1 pages into a single PDF", 95.0],
-            [False, "Compressing PDF", 97.0],
-            [False, "Safe PDF created", 100.0],
-        ]
+        elif transcribing and transcribing.group(0):
+            end_time = datetime.strptime(transcribing.group(2), "%M:%S.%f")
+            duration_percentage = (end_time - self.start_time).seconds / self.duration
+            transcribed_line = transcribing.group(2)
+            percentage = min(100.0, 30 + duration_percentage * 70)
+            error = False
+            text = transcribed_line
+        else:
+            # ignore
+            error_message = f"Unexpected output:\n\n\t {line}"
+            log.error(error_message)
+            return None
 
-        for (error, text, percentage) in progress:
-            self.print_progress(document, error, text, percentage)  # type: ignore [arg-type]
-            if stdout_callback:
-                stdout_callback(error, text, percentage)
-            if error:
-                success = False
-            time.sleep(0.2)
-
-        if success:
-            shutil.copy(
-                get_resource_path("dummy_document.pdf"), document.output_filename
-            )
-
-        return success
+        self.print_progress(document, error, text, percentage)
+        return (error, text, percentage)
 
     def print_progress(
         self, document: Document, error: bool, text: str, percentage: float

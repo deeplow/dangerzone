@@ -5,9 +5,9 @@ import platform
 import shutil
 import subprocess
 import tempfile
+from abc import abstractmethod
 from multiprocessing.pool import ThreadPool
 from typing import List, Optional
-from abc import abstractmethod
 
 from colorama import Fore, Style
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -149,14 +149,17 @@ class WaitingWidgetAbstract(QtWidgets.QWidget):
 
 
 class WaitingWidgetFFmpeg(WaitingWidgetAbstract):
-
     def __init__(self, dangerzone: DangerzoneGui) -> None:
         super(WaitingWidgetFFmpeg, self).__init__(dangerzone)
 
     def check_state(self) -> None:
         state: Optional[str] = None
         try:
-            subprocess.run(["ffmpeg", "--help"], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+            subprocess.run(
+                ["ffmpeg", "--help"],
+                stderr=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+            )
             state = "ffmpeg_installed"
         except FileNotFoundError:
             state = "ffmpeg_not_installed"
