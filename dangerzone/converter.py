@@ -5,30 +5,40 @@ import sys
 import time
 from typing import Callable, Optional
 
-from ..document import Document
-from ..util import get_resource_path
-from .base import IsolationProvider
+from colorama import Fore, Style
+
+from .document import Document
+from .util import get_resource_path
 
 log = logging.getLogger(__name__)
 
 
-class Dummy(IsolationProvider):
-    """Dummy Isolation Provider (FOR TESTING ONLY)
-
-    "Do-nothing" converter - the sanitized files are the same as the input files.
-    Useful for testing without the need to use docker.
-    """
+class Converter:
+    """Implements the interview transcription logic"""
 
     def __init__(self) -> None:
-        # Sanity check
-        if not getattr(sys, "dangerzone_dev", False):
-            raise Exception(
-                "Dummy isolation provider is UNSAFE and should never be "
-                + "called in a non-testing system."
-            )
-
-    def install(self) -> bool:
         pass
+
+    def convert(
+        self,
+        document: Document,
+        ocr_lang: Optional[str],
+        stdout_callback: Optional[Callable] = None,
+    ) -> None:
+        document.mark_as_converting()
+        try:
+            success = self._convert(document, ocr_lang, stdout_callback)
+        except Exception:
+            success = False
+            log.exception(
+                f"An exception occurred while converting document '{document.id}'"
+            )
+        if success:
+            document.mark_as_safe()
+            if document.archive_after_conversion:
+                document.archive()
+        else:
+            document.mark_as_failed()
 
     def _convert(
         self,
@@ -70,6 +80,18 @@ class Dummy(IsolationProvider):
             )
 
         return success
+
+    def print_progress(
+        self, document: Document, error: bool, text: str, percentage: float
+    ) -> None:
+        s = Style.BRIGHT + Fore.YELLOW + f"[doc {document.id}] "
+        s += Fore.CYAN + f"{percentage}% "
+        if error:
+            s += Style.RESET_ALL + Fore.RED + text
+            log.error(s)
+        else:
+            s += Style.RESET_ALL + text
+            log.info(s)
 
     def get_max_parallel_conversions(self) -> int:
         return 1

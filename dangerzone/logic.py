@@ -13,8 +13,8 @@ import appdirs
 import colorama
 
 from . import errors
+from .converter import Converter
 from .document import Document
-from .isolation_provider.base import IsolationProvider
 from .settings import Settings
 from .util import get_resource_path
 
@@ -26,7 +26,7 @@ class DangerzoneCore(object):
     Singleton of shared state / functionality throughout the app
     """
 
-    def __init__(self, isolation_provider: IsolationProvider) -> None:
+    def __init__(self) -> None:
         # Initialize terminal colors
         colorama.init(autoreset=True)
 
@@ -42,7 +42,7 @@ class DangerzoneCore(object):
 
         self.documents: List[Document] = []
 
-        self.isolation_provider = isolation_provider
+        self.converter = Converter()
 
     def add_document_from_filename(
         self,
@@ -62,13 +62,13 @@ class DangerzoneCore(object):
         self, ocr_lang: Optional[str], stdout_callback: Optional[Callable] = None
     ) -> None:
         def convert_doc(document: Document) -> None:
-            self.isolation_provider.convert(
+            self.converter.convert(
                 document,
                 ocr_lang,
                 stdout_callback,
             )
 
-        max_jobs = self.isolation_provider.get_max_parallel_conversions()
+        max_jobs = self.converter.get_max_parallel_conversions()
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_jobs) as executor:
             executor.map(convert_doc, self.documents)
 

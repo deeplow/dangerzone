@@ -13,7 +13,6 @@ from PySide2 import QtCore, QtGui, QtWidgets
 if platform.system() == "Linux":
     from xdg.DesktopEntry import DesktopEntry
 
-from ..isolation_provider.base import IsolationProvider
 from ..logic import DangerzoneCore
 from ..settings import Settings
 from ..util import get_resource_path
@@ -26,10 +25,8 @@ class DangerzoneGui(DangerzoneCore):
     Singleton of shared state / functionality for the GUI and core app logic
     """
 
-    def __init__(
-        self, app: QtWidgets.QApplication, isolation_provider: IsolationProvider
-    ) -> None:
-        super().__init__(isolation_provider)
+    def __init__(self, app: QtWidgets.QApplication) -> None:
+        super().__init__()
 
         # Qt app
         self.app = app
@@ -42,9 +39,6 @@ class DangerzoneGui(DangerzoneCore):
 
         # Preload list of PDF viewers on computer
         self.pdf_viewers = self._find_pdf_viewers()
-
-        # Are we done waiting (for Docker Desktop to be installed, or for container to install)
-        self.is_waiting_finished = False
 
     def get_window_icon(self) -> QtGui.QIcon:
         if platform.system() == "Windows":

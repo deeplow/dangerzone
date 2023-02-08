@@ -13,8 +13,6 @@ from PySide2 import QtCore, QtGui, QtWidgets
 
 from .. import errors
 from ..document import SAFE_EXTENSION, Document
-from ..isolation_provider.container import Container, NoContainerTechException
-from ..isolation_provider.dummy import Dummy
 from ..util import get_resource_path, get_subprocess_startupinfo, get_version
 from .logic import Alert, DangerzoneGui
 
@@ -57,31 +55,13 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addWidget(header_version_label)
         header_layout.addStretch()
 
-        if isinstance(self.dangerzone.isolation_provider, Container):
-            # Waiting widget replaces content widget while container runtime isn't available
-            self.waiting_widget: WaitingWidget = WaitingWidgetContainer(self.dangerzone)
-            self.waiting_widget.finished.connect(self.waiting_finished)
-
-        elif isinstance(self.dangerzone.isolation_provider, Dummy):
-            # Don't wait with dummy converter
-            self.waiting_widget = WaitingWidget()
-            self.dangerzone.is_waiting_finished = True
-
-        # Content widget, contains all the window content except waiting widget
+        # Content widget, contains all the window content
         self.content_widget = ContentWidget(self.dangerzone)
-
-        # Only use the waiting widget if container runtime isn't available
-        if self.dangerzone.is_waiting_finished:
-            self.waiting_widget.hide()
-            self.content_widget.show()
-        else:
-            self.waiting_widget.show()
-            self.content_widget.hide()
+        self.content_widget.show()
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(header_layout)
-        layout.addWidget(self.waiting_widget, stretch=1)
         layout.addWidget(self.content_widget, stretch=1)
 
         central_widget = QtWidgets.QWidget()
@@ -89,11 +69,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.show()
-
-    def waiting_finished(self) -> None:
-        self.dangerzone.is_waiting_finished = True
-        self.waiting_widget.hide()
-        self.content_widget.show()
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
         alert_widget = Alert(
@@ -113,120 +88,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 e.accept()
 
         self.dangerzone.app.quit()
-
-
-class InstallContainerThread(QtCore.QThread):
-    finished = QtCore.Signal()
-
-    def __init__(self, dangerzone: DangerzoneGui) -> None:
-        super(InstallContainerThread, self).__init__()
-        self.dangerzone = dangerzone
-
-    def run(self) -> None:
-        self.finished.emit()
-
-
-class WaitingWidget(QtWidgets.QWidget):
-    finished = QtCore.Signal()
-
-    def __init__(self) -> None:
-        super(WaitingWidget, self).__init__()
-
-
-class WaitingWidgetContainer(WaitingWidget):
-    # These are the possible states that the WaitingWidget can show.
-    #
-    # Windows and macOS states:
-    # - "not_installed"
-    # - "not_running"
-    # - "install_container"
-    #
-    # Linux states
-    # - "install_container"
-    finished = QtCore.Signal()
-
-    def __init__(self, dangerzone: DangerzoneGui) -> None:
-        super(WaitingWidgetContainer, self).__init__()
-        self.dangerzone = dangerzone
-
-        self.label = QtWidgets.QLabel()
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setTextFormat(QtCore.Qt.RichText)
-        self.label.setOpenExternalLinks(True)
-        self.label.setStyleSheet("QLabel { font-size: 20px; }")
-
-        # Buttons
-        check_button = QtWidgets.QPushButton("Check Again")
-        check_button.clicked.connect(self.check_state)
-        buttons_layout = QtWidgets.QHBoxLayout()
-        buttons_layout.addStretch()
-        buttons_layout.addWidget(check_button)
-        buttons_layout.addStretch()
-        self.buttons = QtWidgets.QWidget()
-        self.buttons.setLayout(buttons_layout)
-
-        # Layout
-        layout = QtWidgets.QVBoxLayout()
-        layout.addStretch()
-        layout.addWidget(self.label)
-        layout.addStretch()
-        layout.addWidget(self.buttons)
-        layout.addStretch()
-        self.setLayout(layout)
-
-        # Check the state
-        self.check_state()
-
-    def check_state(self) -> None:
-        state: Optional[str] = None
-
-        try:
-            if isinstance(  # Sanity check
-                self.dangerzone.isolation_provider, Container
-            ):
-                container_runtime = self.dangerzone.isolation_provider.get_runtime()
-        except NoContainerTechException as e:
-            log.error(str(e))
-            state = "not_installed"
-
-        else:
-            # Can we run `docker image ls` without an error
-            with subprocess.Popen(
-                [container_runtime, "image", "ls"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                startupinfo=get_subprocess_startupinfo(),
-            ) as p:
-                p.communicate()
-                if p.returncode != 0:
-                    log.error("Docker is not running")
-                    state = "not_running"
-                else:
-                    # Always try installing the container
-                    state = "install_container"
-
-        # Update the state
-        self.state_change(state)
-
-    def state_change(self, state: str) -> None:
-        if state == "not_installed":
-            self.label.setText(
-                "<strong>Dangerzone Requires Docker Desktop</strong><br><br><a href='https://www.docker.com/products/docker-desktop'>Download Docker Desktop</a>, install it, and open it."
-            )
-            self.buttons.show()
-        elif state == "not_running":
-            self.label.setText(
-                "<strong>Dangerzone Requires Docker Desktop</strong><br><br>Docker is installed but isn't running.<br><br>Open Docker and make sure it's running in the background."
-            )
-            self.buttons.show()
-        else:
-            self.label.setText(
-                "Installing the Dangerzone container image.<br><br>This might take a few minutes..."
-            )
-            self.buttons.hide()
-            self.install_container_t = InstallContainerThread(self.dangerzone)
-            self.install_container_t.finished.connect(self.finished)
-            self.install_container_t.start()
 
 
 class ContentWidget(QtWidgets.QWidget):
@@ -653,7 +514,7 @@ class ConvertTask(QtCore.QObject):
         self.dangerzone = dangerzone
 
     def convert_document(self) -> None:
-        self.dangerzone.isolation_provider.convert(
+        self.dangerzone.converter.convert(
             self.document,
             self.ocr_lang,
             self.stdout_callback,
@@ -688,7 +549,7 @@ class DocumentsListWidget(QtWidgets.QListWidget):
 
     def start_conversion(self) -> None:
         if not self.thread_pool_initized:
-            max_jobs = self.dangerzone.isolation_provider.get_max_parallel_conversions()
+            max_jobs = self.dangerzone.converter.get_max_parallel_conversions()
             self.thread_pool = ThreadPool(max_jobs)
 
         for doc_widget in self.document_widgets:
