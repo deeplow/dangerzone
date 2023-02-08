@@ -22,12 +22,12 @@ else:
     datas = [("../../share", "share")]
 
 if p == "Windows":
-    icon = os.path.join(root, "share", "dangerzone.ico")
+    icon = os.path.join(root, "share", "whisperzone.ico")
 else:
     icon = None
 
 a = Analysis(
-    ["dangerzone"],
+    ["whisperzone"],
     pathex=["."],
     binaries=None,
     datas=datas,
@@ -46,7 +46,7 @@ exe = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name="dangerzone",
+    name="whisperzone",
     debug=False,
     strip=False,
     upx=True,
@@ -55,7 +55,7 @@ exe = EXE(
 )
 
 coll = COLLECT(
-    exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=True, name="dangerzone"
+    exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=True, name="whisperzone"
 )
 
 # The macOS app bundle
@@ -63,8 +63,8 @@ if p == "Darwin":
     app = BUNDLE(
         coll,
         name="Dangerzone.app",
-        icon="../macos/dangerzone.icns",
-        bundle_identifier="media.firstlook.dangerzone",
+        icon="../macos/whisperzone.icns",
+        bundle_identifier="org.deeplow.whisperzone",
         info_plist={
             "NSHighResolutionCapable": True,
             "CFBundleShortVersionString": version,

@@ -17,29 +17,27 @@ def file_list(path):
 
 
 setuptools.setup(
-    name="dangerzone",
+    name="whisperzone",
     version=version,
-    author="Micah Lee",
-    author_email="micah.lee@theintercept.com",
+    author="Deeplow",
+    author_email="deeplower@protonmail.com",
     license="MIT",
-    description="Take potentially dangerous PDFs, office documents, or images and convert them to safe PDFs",
+    description="Offline user interface for OpenAI's Whisper transcription tool",
     long_description="""\
-Dangerzone is an open source desktop application that takes potentially \
-dangerous PDFs, office documents, or images and converts them to safe PDFs. \
-It uses container technology to convert the documents within a secure sandbox.\
+Transcribe sensitive interviews offline with whisperzone.
 """,
-    url="https://github.com/freedomofpress/dangerzone",
-    packages=["dangerzone", "dangerzone.gui"],
+    url="https://github.com/deeplow/whisperzone",
+    packages=["whisperzone", "whisperzone.gui"],
     data_files=[
         (
             "share/applications",
-            ["install/linux/media.firstlook.dangerzone.desktop"],
+            ["install/linux/whisperzone.desktop"],
         ),
         (
             "share/icons/hicolor/64x64/apps",
-            ["install/linux/media.firstlook.dangerzone.png"],
+            ["install/linux/whisperzone.png"],
         ),
-        ("share/dangerzone", file_list("share")),
+        ("share/whisperzone", file_list("share")),
     ],
     classifiers=[
         "Programming Language :: Python",
@@ -48,7 +46,7 @@ It uses container technology to convert the documents within a secure sandbox.\
     ],
     entry_points={
         "console_scripts": [
-            "dangerzone = dangerzone:main",
+            "whisperzone = whisperzone:main",
         ]
     },
 )

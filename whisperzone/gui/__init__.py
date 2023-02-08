@@ -26,7 +26,7 @@ class Application(QtWidgets.QApplication):
     def __init__(self) -> None:
         super(Application, self).__init__()
         self.setQuitOnLastWindowClosed(False)
-        with open(get_resource_path("dangerzone.css"), "r") as f:
+        with open(get_resource_path("whisperzone.css"), "r") as f:
             style = f.read()
         self.setStyleSheet(style)
         self.original_event = self.event
@@ -36,7 +36,7 @@ class Application(QtWidgets.QApplication):
             # In macOS, handle the file open event
             if isinstance(event, QtGui.QFileOpenEvent):
                 # Skip file open events in dev mode
-                if not hasattr(sys, "dangerzone_dev"):
+                if not hasattr(sys, "whisperzone_dev"):
                     self.document_selected.emit([event.file()])
                     return True
             elif event.type() == QtCore.QEvent.ApplicationActivate:

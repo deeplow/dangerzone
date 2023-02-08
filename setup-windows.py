@@ -6,14 +6,14 @@ from cx_Freeze import Executable, setup
 with open("share/version.txt") as f:
     version = f.read().strip()
 
-packages = ["dangerzone", "dangerzone.gui"]
+packages = ["whisperzone", "whisperzone.gui"]
 
 setup(
-    name="dangerzone",
+    name="whisperzone",
     version=version,
     # On Windows description will show as the app's name in the "Open With" menu. See:
     # https://github.com/freedomofpress/dangerzone/issues/283#issuecomment-1365148805
-    description="Dangerzone",
+    description="Whisperzone",
     packages=packages,
     options={
         "build_exe": {
@@ -25,9 +25,9 @@ setup(
     },
     executables=[
         Executable(
-            "install/windows/dangerzone.py",
+            "install/windows/whisperzone.py",
             base="Win32GUI",
-            icon="share/dangerzone.ico",
+            icon="share/whisperzone.ico",
         ),
     ],
 )

@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dangerzone import errors
-from dangerzone.document import ARCHIVE_SUBDIR, SAFE_EXTENSION, Document
+from whisperzone import errors
+from whisperzone.document import ARCHIVE_SUBDIR, SAFE_EXTENSION, Document
 
 from . import sample_doc, unreadable_pdf
 

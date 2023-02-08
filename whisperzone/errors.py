@@ -102,7 +102,7 @@ def handle_document_errors(func: F) -> F:
         try:
             return func(*args, **kwargs)
         except DocumentFilenameException as e:
-            if getattr(sys, "dangerzone_dev", False):
+            if getattr(sys, "whisperzone_dev", False):
                 # Show the full traceback only on dev environments.
                 msg = "An exception occured while validating a document"
                 log.exception(msg)

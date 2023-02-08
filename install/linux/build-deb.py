@@ -37,7 +37,7 @@ def main():
 
     print("")
     print("* To install run:")
-    print("sudo dpkg -i deb_dist/dangerzone_{}-1_all.deb".format(version))
+    print("sudo dpkg -i deb_dist/whisperzone_{}-1_all.deb".format(version))
 
 
 if __name__ == "__main__":

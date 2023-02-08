@@ -36,7 +36,7 @@ def main():
 
     print("")
     print("* To install run:")
-    print("sudo dnf install dist/dangerzone-{}-1.noarch.rpm".format(version))
+    print("sudo dnf install dist/whisperzone-{}-1.noarch.rpm".format(version))
 
 
 if __name__ == "__main__":

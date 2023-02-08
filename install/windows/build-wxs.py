@@ -70,7 +70,7 @@ def build_dir_xml(root, data):
             Id="ApplicationShortcut1",
             Name="Dangerzone",
             Description="Dangerzone",
-            Target="[INSTALLDIR]dangerzone.exe",
+            Target="[INSTALLDIR]whisperzone.exe",
             WorkingDirectory="INSTALLDIR",
         )
         ET.SubElement(
@@ -124,7 +124,7 @@ def main():
         "exe.win-amd64-3.10",
     )
     if not os.path.exists(dist_dir):
-        print("You must build the dangerzone binary before running this")
+        print("You must build the whisperzone binary before running this")
         return
 
     data = {
@@ -177,14 +177,14 @@ def main():
     )
     ET.SubElement(product_el, "Media", Id="1", Cabinet="product.cab", EmbedCab="yes")
     ET.SubElement(
-        product_el, "Icon", Id="ProductIcon", SourceFile="..\\share\\dangerzone.ico"
+        product_el, "Icon", Id="ProductIcon", SourceFile="..\\share\\whisperzone.ico"
     )
     ET.SubElement(product_el, "Property", Id="ARPPRODUCTICON", Value="ProductIcon")
     ET.SubElement(
         product_el,
         "Property",
         Id="ARPHELPLINK",
-        Value="https://dangerzone.rocks",
+        Value="https://whisperzone.rocks",
     )
     ET.SubElement(
         product_el,

@@ -39,7 +39,7 @@ class DangerzoneGui(DangerzoneCore):
 
     def get_window_icon(self) -> QtGui.QIcon:
         if platform.system() == "Windows":
-            path = get_resource_path("dangerzone.ico")
+            path = get_resource_path("whisperzone.ico")
         else:
             path = get_resource_path("icon.png")
         return QtGui.QIcon(path)
@@ -57,7 +57,7 @@ class Alert(QtWidgets.QDialog):
         super(Alert, self).__init__()
         self.dangerzone = dangerzone
 
-        self.setWindowTitle("dangerzone")
+        self.setWindowTitle("whisperzone")
         self.setWindowIcon(self.dangerzone.get_window_icon())
         self.setModal(True)
 

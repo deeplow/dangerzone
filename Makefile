@@ -22,7 +22,7 @@ MYPY_ARGS := --ignore-missing-imports \
 			 --warn-unused-ignores
 
 mypy-host:
-	mypy $(MYPY_ARGS) dangerzone
+	mypy $(MYPY_ARGS) whisperzone
 
 mypy-container:
 	mypy $(MYPY_ARGS) container
@@ -52,7 +52,7 @@ test:
 # 6. Format columns with colon as delimiter.
 .PHONY: help
 help: ## Print this message and exit.
-	@printf "Makefile for developing and testing dangerzone.\n"
+	@printf "Makefile for developing and testing whisperzone.\n"
 	@printf "Subcommands:\n\n"
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {printf "\033[36m%s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST) \
 		| sort \
