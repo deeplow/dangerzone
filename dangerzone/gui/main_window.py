@@ -26,7 +26,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         self.dangerzone = dangerzone
 
-        self.setWindowTitle("Dangerzone")
+        self.setWindowTitle("Whisperzone")
         self.setWindowIcon(self.dangerzone.get_window_icon())
 
         self.setMinimumWidth(600)
@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
         logo.setPixmap(
             QtGui.QPixmap.fromImage(QtGui.QImage(get_resource_path("icon.png")))
         )
-        header_label = QtWidgets.QLabel("dangerzone")
+        header_label = QtWidgets.QLabel("Whisperzone")
         header_label.setFont(self.dangerzone.fixed_font)
         header_label.setStyleSheet("QLabel { font-weight: bold; font-size: 50px; }")
         header_version_label = QtWidgets.QLabel(get_version())
@@ -123,7 +123,6 @@ class InstallContainerThread(QtCore.QThread):
         self.dangerzone = dangerzone
 
     def run(self) -> None:
-        self.dangerzone.isolation_provider.install()
         self.finished.emit()
 
 
@@ -318,9 +317,7 @@ class DocSelectionWidget(QtWidgets.QWidget):
         # Dangerous document selection
         self.dangerous_doc_label = QtWidgets.QLabel()
         self.dangerous_doc_label.hide()
-        self.dangerous_doc_button = QtWidgets.QPushButton(
-            "Select suspicious documents ..."
-        )
+        self.dangerous_doc_button = QtWidgets.QPushButton("Select audio interviews ...")
         self.dangerous_doc_button.setStyleSheet(
             "QPushButton { font-weight: bold; padding: 10px; }"
         )
@@ -342,7 +339,7 @@ class DocSelectionWidget(QtWidgets.QWidget):
         (filenames, _) = QtWidgets.QFileDialog.getOpenFileNames(
             self,
             "Open documents",
-            filter="Documents (*.pdf *.docx *.doc *.docm *.xlsx *.xls *.pptx *.ppt *.odt *.odg *.odp *.ods *.jpg *.jpeg *.gif *.png *.tif *.tiff)",
+            filter="Documents (*.mp3 *.m4a *.wav)",
         )
         if filenames == []:
             # no files selected
