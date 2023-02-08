@@ -310,91 +310,6 @@ class SettingsWidget(QtWidgets.QWidget):
         self.docs_selected_label.setContentsMargins(0, 0, 0, 20)
         self.docs_selected_label.setProperty("class", "docs-selection")  # type: ignore [arg-type]
 
-        # Save safe version
-        self.save_checkbox = QtWidgets.QCheckBox()
-        self.save_checkbox.clicked.connect(self.update_ui)
-
-        # Save safe as... [filename]-safe.pdf
-        self.safe_extension_label = QtWidgets.QLabel("Save as")
-        self.safe_extension_filename = QtWidgets.QLabel("document")
-        self.safe_extension_filename.setAlignment(QtCore.Qt.AlignRight)
-        self.safe_extension_filename.setProperty(
-            "style", "safe_extension_filename"  # type: ignore
-        )
-        self.safe_extension = QtWidgets.QLineEdit()
-        self.safe_extension.setStyleSheet("margin-left: -6px;")  # no left margin
-        self.safe_extension.textChanged.connect(self.update_ui)
-        self.safe_extension_invalid = QtWidgets.QLabel("(must end in .pdf)")
-        self.safe_extension_invalid.setStyleSheet("color: red")
-        self.safe_extension_invalid.hide()
-        self.safe_extension_name_layout = QtWidgets.QHBoxLayout()
-        self.safe_extension_name_layout.setSpacing(0)
-        self.safe_extension_name_layout.addWidget(self.safe_extension_filename)
-        self.safe_extension_name_layout.addWidget(self.safe_extension)
-
-        dot_pdf_regex = QtCore.QRegExp(r".*\.[Pp][Dd][Ff]")
-        self.safe_extension.setValidator(QtGui.QRegExpValidator(dot_pdf_regex))
-        self.safe_extension_layout = QtWidgets.QHBoxLayout()
-        self.safe_extension_layout.addWidget(self.save_checkbox)
-        self.safe_extension_layout.addWidget(self.safe_extension_label)
-        self.safe_extension_layout.addLayout(self.safe_extension_name_layout)
-        self.safe_extension_layout.addWidget(self.safe_extension_invalid)
-        self.safe_extension_layout.addStretch()
-
-        # Save safe to...
-        self.save_label = QLabelClickable("Save safe PDFs to")
-        self.save_location = QtWidgets.QLineEdit()
-        self.save_location.setReadOnly(True)
-        self.save_browse_button = QtWidgets.QPushButton("Choose...")
-        self.save_browse_button.clicked.connect(self.select_output_directory)
-        self.save_location_layout = QtWidgets.QHBoxLayout()
-        self.save_location_layout.setContentsMargins(20, 0, 0, 0)
-        self.save_location_layout.addWidget(self.save_label)
-        self.save_location_layout.addWidget(self.save_location)
-        self.save_location_layout.addWidget(self.save_browse_button)
-        self.save_location_layout.addStretch()
-
-        # 'Save PDF to' group box
-        save_group_box_innner_layout = QtWidgets.QVBoxLayout()
-        save_group_box = QtWidgets.QGroupBox()
-        save_group_box.setLayout(save_group_box_innner_layout)
-        save_group_box_layout = QtWidgets.QHBoxLayout()
-        save_group_box_layout.setContentsMargins(20, 0, 0, 0)
-        save_group_box_layout.addWidget(save_group_box)
-        self.radio_move_untrusted = QtWidgets.QRadioButton(
-            "Move original documents to 'unsafe' subdirectory"
-        )
-        save_group_box_innner_layout.addWidget(self.radio_move_untrusted)
-        self.radio_save_to = QtWidgets.QRadioButton()
-        self.save_label.clicked.connect(
-            lambda: self.radio_save_to.setChecked(True)
-        )  # select the radio button when label is clicked
-        self.radio_save_to.setMinimumHeight(30)  # make the QTextEdit fully visible
-        self.radio_save_to.setLayout(self.save_location_layout)
-        save_group_box_innner_layout.addWidget(self.radio_save_to)
-
-        # Open safe document
-        if platform.system() in ["Darwin", "Windows"]:
-            self.open_checkbox = QtWidgets.QCheckBox(
-                "Open safe documents after converting"
-            )
-            self.open_checkbox.clicked.connect(self.update_ui)
-
-        elif platform.system() == "Linux":
-            self.open_checkbox = QtWidgets.QCheckBox(
-                "Open safe documents after converting, using"
-            )
-            self.open_checkbox.clicked.connect(self.update_ui)
-            self.open_combobox = QtWidgets.QComboBox()
-            for k in self.dangerzone.pdf_viewers:
-                self.open_combobox.addItem(k, self.dangerzone.pdf_viewers[k])
-
-        open_layout = QtWidgets.QHBoxLayout()
-        open_layout.addWidget(self.open_checkbox)
-        if platform.system() == "Linux":
-            open_layout.addWidget(self.open_combobox)
-        open_layout.addStretch()
-
         # OCR document
         self.ocr_checkbox = QtWidgets.QCheckBox("OCR document, language")
         self.ocr_combobox = QtWidgets.QComboBox()
@@ -418,10 +333,6 @@ class SettingsWidget(QtWidgets.QWidget):
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.docs_selected_label)
-        layout.addLayout(self.safe_extension_layout)
-        layout.addLayout(save_group_box_layout)
-        layout.addLayout(open_layout)
         layout.addLayout(ocr_layout)
         layout.addSpacing(20)
         layout.addLayout(button_layout)
@@ -429,21 +340,6 @@ class SettingsWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
         # Load values from settings
-        if self.dangerzone.settings.get("save"):
-            self.save_checkbox.setCheckState(QtCore.Qt.Checked)
-        else:
-            self.save_checkbox.setCheckState(QtCore.Qt.Unchecked)
-
-        if self.dangerzone.settings.get("safe_extension"):
-            self.safe_extension.setText(self.dangerzone.settings.get("safe_extension"))
-        else:
-            self.safe_extension.setText(SAFE_EXTENSION)
-
-        if self.dangerzone.settings.get("archive"):
-            self.radio_move_untrusted.setChecked(True)
-        else:
-            self.radio_save_to.setChecked(True)
-
         if self.dangerzone.settings.get("ocr"):
             self.ocr_checkbox.setCheckState(QtCore.Qt.Checked)
         else:
@@ -453,70 +349,12 @@ class SettingsWidget(QtWidgets.QWidget):
         if index != -1:
             self.ocr_combobox.setCurrentIndex(index)
 
-        if self.dangerzone.settings.get("open"):
-            self.open_checkbox.setCheckState(QtCore.Qt.Checked)
-        else:
-            self.open_checkbox.setCheckState(QtCore.Qt.Unchecked)
-
-        if platform.system() == "Linux":
-            index = self.open_combobox.findText(
-                self.dangerzone.settings.get("open_app")
-            )
-            if index != -1:
-                self.open_combobox.setCurrentIndex(index)
-
-    def check_safe_extension_is_valid(self) -> bool:
-        if self.save_checkbox.checkState() == QtCore.Qt.Unchecked:
-            # ignore validity if not saving file
-            self.safe_extension_invalid.hide()
-            return True
-
-        if self.safe_extension.hasAcceptableInput():
-            self.safe_extension_invalid.hide()
-            return True
-        else:
-            # prevent starting conversion until correct
-            self.safe_extension_invalid.show()
-            return False
-
-    def check_either_save_or_open(self) -> bool:
-        return (
-            self.save_checkbox.checkState() == QtCore.Qt.Checked
-            or self.open_checkbox.checkState() == QtCore.Qt.Checked
-        )
-
-    def check_writeable_archive_dir(self, docs: List[Document]) -> None:
-        # assumed all documents are in the same directory
-        first_doc = docs[0]
-        try:
-            first_doc.validate_default_archive_dir()
-        except errors.UnwriteableArchiveDirException:
-            self.radio_move_untrusted.setDisabled(True)
-            self.radio_move_untrusted.setChecked(False)
-            self.radio_move_untrusted.setToolTip(
-                'Option disabled because Dangerzone couldn\'t create "untrusted"\n'
-                + "subdirectory in the same directory as the original files."
-            )
-            self.radio_save_to.setChecked(True)
-
     def update_ui(self) -> None:
-        conversion_readiness_conditions = [
-            self.check_safe_extension_is_valid(),
-            self.check_either_save_or_open(),
-        ]
-        if all(conversion_readiness_conditions):
-            self.start_button.setEnabled(True)
-        else:
-            self.start_button.setDisabled(True)
+        pass
 
     def documents_added(self, new_docs: List[Document]) -> None:
-        self.save_location.setText(os.path.basename(self.dangerzone.output_dir))
         self.update_doc_n_labels()
-
         self.update_ui()
-
-        # validations
-        self.check_writeable_archive_dir(new_docs)
 
     def update_doc_n_labels(self) -> None:
         """Updates labels dependent on the number of present documents"""
@@ -529,56 +367,12 @@ class SettingsWidget(QtWidgets.QWidget):
             self.start_button.setText("Convert to Safe Documents")
             self.docs_selected_label.setText(f"{n_docs} documents selected")
 
-    def select_output_directory(self) -> None:
-        dialog = QtWidgets.QFileDialog()
-        dialog.setLabelText(QtWidgets.QFileDialog.Accept, "Select output directory")
-
-        # open the directory where the user last saved it
-        dialog.setDirectory(self.dangerzone.output_dir)
-
-        # allow only the selection of directories
-        dialog.setFileMode(QtWidgets.QFileDialog.DirectoryOnly)
-        dialog.setOption(QtWidgets.QFileDialog.ShowDirsOnly, True)
-
-        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-            selected_dir = dialog.selectedFiles()[0]
-            if selected_dir is not None:
-                self.dangerzone.output_dir = str(selected_dir)
-                self.save_location.setText(selected_dir)
-
     def start_button_clicked(self) -> None:
-        for document in self.dangerzone.get_unconverted_documents():
-            if self.save_checkbox.isChecked():
-                # If we're saving the document, set the suffix that the user chose. Then
-                # check if we should to store the document in the same directory, and
-                # move the original document to an 'unsafe' subdirectory, or save the
-                # document to another directory.
-                document.suffix = self.safe_extension.text()
-                if self.radio_move_untrusted.isChecked():
-                    document.archive_after_conversion = True
-                elif self.radio_save_to.isChecked():
-                    document.set_output_dir(self.dangerzone.output_dir)
-            else:
-                # If not saving, then save it to a temp file instead
-                (_, tmp) = tempfile.mkstemp(suffix=".pdf", prefix="dangerzone_")
-                document.output_filename = tmp
-
         # Update settings
-        self.dangerzone.settings.set(
-            "save", self.save_checkbox.checkState() == QtCore.Qt.Checked
-        )
-        self.dangerzone.settings.set("safe_extension", self.safe_extension.text())
-        self.dangerzone.settings.set("archive", self.radio_move_untrusted.isChecked())
         self.dangerzone.settings.set(
             "ocr", self.ocr_checkbox.checkState() == QtCore.Qt.Checked
         )
         self.dangerzone.settings.set("ocr_language", self.ocr_combobox.currentText())
-        self.dangerzone.settings.set(
-            "open", self.open_checkbox.checkState() == QtCore.Qt.Checked
-        )
-        if platform.system() == "Linux":
-            self.dangerzone.settings.set("open_app", self.open_combobox.currentText())
-        self.dangerzone.settings.save()
 
         # Start!
         self.start_clicked.emit()
