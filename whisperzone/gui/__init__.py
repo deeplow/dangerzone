@@ -75,7 +75,7 @@ def gui_main(filenames: Optional[List[str]]) -> bool:
         os.environ["QT_MAC_WANTS_LAYER"] = "1"
 
         # Make sure /usr/local/bin is in the path
-        os.environ["PATH"] = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin"
+        os.environ["PATH"] = f"/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:{os.environ['PATH']}"
 
         # Don't show ANSI colors from stdout output, to prevent terminal
         # colors from breaking the macOS GUI app
