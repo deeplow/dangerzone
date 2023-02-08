@@ -98,6 +98,7 @@ Install [Homebrew](https://brew.sh/) dependencies:
 
 ```sh
 brew install create-dmg
+brew install ffmpeg
 ```
 
 Run from source tree:

@@ -10,11 +10,7 @@ Whisperzone uses [OpenAI's Whisper](https://github.com/openai/whisper) software 
 
 ## Getting started
 
-- Download [Whisperzone 0.4.0 for Mac](TODO)
-- Download [Whisperzone 0.4.0 for Windows](TODO)
-- See [installing Whisperzone](INSTALL.md) for Linux repositories
-
-You can also install Whisperzone for Mac using [Homebrew](https://brew.sh/): `brew install --cask whisperzone`
+Currently, Whisperzone and only be installed directly from the source code. You can find instructions [here](BUILD.md).
 
 ## About
 
