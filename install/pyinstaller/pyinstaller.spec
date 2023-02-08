@@ -14,7 +14,7 @@ root = os.path.dirname(
 with open(os.path.join(root, "share", "version.txt")) as f:
     version = f.read().strip()
 
-print("Dangerzone version: {}".format(version))
+print("Whisperzone version: {}".format(version))
 
 if p == "Darwin":
     datas = [("../../share", "share"), ("../macos/document.icns", ".")]
@@ -62,7 +62,7 @@ coll = COLLECT(
 if p == "Darwin":
     app = BUNDLE(
         coll,
-        name="Dangerzone.app",
+        name="Whisperzone.app",
         icon="../macos/whisperzone.icns",
         bundle_identifier="org.deeplow.whisperzone",
         info_plist={

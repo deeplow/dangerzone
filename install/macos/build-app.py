@@ -50,9 +50,9 @@ def main():
 
     build_path = os.path.join(root, "build")
     dist_path = os.path.join(root, "dist")
-    app_path = os.path.join(dist_path, "Dangerzone.app")
-    dmg_path = os.path.join(dist_path, "Dangerzone.dmg")
-    icon_path = os.path.join(root, "install", "macos", "dangerzone.icns")
+    app_path = os.path.join(dist_path, "Whisperzone.app")
+    dmg_path = os.path.join(dist_path, "Whisperzone.dmg")
+    icon_path = os.path.join(root, "install", "macos", "whisperzone.icns")
 
     print("○ Deleting old build and dist")
     if os.path.exists(build_path):
@@ -62,7 +62,7 @@ def main():
 
     print("○ Building app bundle")
     run(["pyinstaller", "install/pyinstaller/pyinstaller.spec", "--clean"])
-    shutil.rmtree(os.path.join(dist_path, "dangerzone"))
+    shutil.rmtree(os.path.join(dist_path, "whisperzone"))
 
     print(f"○ Finished build app: {app_path}")
 
@@ -92,7 +92,7 @@ def main():
             [
                 "create-dmg",
                 "--volname",
-                "Dangerzone",
+                "Whisperzone",
                 "--volicon",
                 icon_path,
                 "--window-size",
@@ -101,11 +101,11 @@ def main():
                 "--icon-size",
                 "100",
                 "--icon",
-                "Dangerzone.app",
+                "Whisperzone.app",
                 "100",
                 "70",
                 "--hide-extension",
-                "Dangerzone.app",
+                "Whisperzone.app",
                 "--app-drop-link",
                 "300",
                 "70",

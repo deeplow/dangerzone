@@ -133,4 +133,4 @@ dmypy.json
 deb_dist
 .DS_Store
 tests/test_docs/**/*-safe.pdf
-install/windows/Dangerzone.wxs
+install/windows/Whisperzone.wxs

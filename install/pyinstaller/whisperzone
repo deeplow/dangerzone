@@ -8,6 +8,6 @@ import os
 
 os.environ["LANG"] = "en_US.UTF-8"
 
-import dangerzone
+import whisperzone
 
-dangerzone.main()
+whisperzone.main()

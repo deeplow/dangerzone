@@ -68,8 +68,8 @@ def build_dir_xml(root, data):
             component_el,
             "Shortcut",
             Id="ApplicationShortcut1",
-            Name="Dangerzone",
-            Description="Dangerzone",
+            Name="Whisperzone",
+            Description="Whisperzone",
             Target="[INSTALLDIR]whisperzone.exe",
             WorkingDirectory="INSTALLDIR",
         )
@@ -77,7 +77,7 @@ def build_dir_xml(root, data):
             component_el,
             "RegistryValue",
             Root="HKCU",
-            Key="Software\First Look Media\Dangerzone",
+            Key="Software\First Look Media\Whisperzone",
             Name="installed",
             Type="integer",
             Value="1",
@@ -147,7 +147,7 @@ def main():
             dist_dir,
             "exe.win-amd64-3.10",
             "INSTALLDIR",
-            "Dangerzone",
+            "Whisperzone",
         )
     )
 
@@ -155,7 +155,7 @@ def main():
     product_el = ET.SubElement(
         root_el,
         "Product",
-        Name="Dangerzone",
+        Name="Whisperzone",
         Manufacturer="First Look Media",
         Id="*",
         UpgradeCode="$(var.ProductUpgradeCode)",
@@ -168,7 +168,7 @@ def main():
         "Package",
         Id="*",
         Keywords="Installer",
-        Description="Dangerzone $(var.ProductVersion) Installer",
+        Description="Whisperzone $(var.ProductVersion) Installer",
         Manufacturer="First Look Media",
         InstallerVersion="100",
         Languages="1033",

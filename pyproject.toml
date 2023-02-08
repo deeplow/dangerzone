@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dangerzone"
+name = "whisperzone"
 version = "0.1.0"
 description = "Take potentially dangerous PDFs, office documents, or images and convert them to safe PDFs"
 authors = ["Micah Lee <micah.lee@theintercept.com>"]
@@ -15,7 +15,7 @@ pyxdg = {version = "*", platform = "linux"}
 openai-whisper = "^20230124"
 
 [tool.poetry.scripts]
-dangerzone = 'dangerzone:main'
+whisperzone = 'whisperzone:main'
 
 # Dependencies required for packaging the code on various platforms.
 [tool.poetry.group.package.dependencies]
