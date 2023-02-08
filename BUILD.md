@@ -35,9 +35,6 @@ Run from source tree:
 # start a shell in the virtual environment
 poetry shell
 
-# run the CLI
-./dev_scripts/dangerzone-cli --help
-
 # run the GUI
 ./dev_scripts/dangerzone
 ```
@@ -81,9 +78,6 @@ Run from source tree:
 ```sh
 # start a shell in the virtual environment
 poetry shell
-
-# run the CLI
-./dev_scripts/dangerzone-cli --help
 
 # run the GUI
 ./dev_scripts/dangerzone
@@ -131,9 +125,6 @@ Run from source tree:
 ```sh
 # start a shell in the virtual environment
 poetry shell
-
-# run the CLI
-./dev_scripts/dangerzone-cli --help
 
 # run the GUI
 ./dev_scripts/dangerzone
@@ -185,9 +176,6 @@ After that you can launch dangerzone during development with:
 ```
 # start a shell in the virtual environment
 poetry shell
-
-# run the CLI
-.\dev_scripts\dangerzone-cli.bat --help
 
 # run the GUI
 .\dev_scripts\dangerzone.bat

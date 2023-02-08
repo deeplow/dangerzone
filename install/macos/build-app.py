@@ -64,11 +64,6 @@ def main():
     run(["pyinstaller", "install/pyinstaller/pyinstaller.spec", "--clean"])
     shutil.rmtree(os.path.join(dist_path, "dangerzone"))
 
-    os.symlink(
-        "dangerzone",
-        os.path.join(app_path, "Contents/MacOS/dangerzone-cli"),
-    )
-
     print(f"○ Finished build app: {app_path}")
 
     if args.with_codesign:

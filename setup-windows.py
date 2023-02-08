@@ -29,8 +29,5 @@ setup(
             base="Win32GUI",
             icon="share/dangerzone.ico",
         ),
-        Executable(
-            "install/windows/dangerzone-cli.py", base=None, icon="share/dangerzone.ico"
-        ),
     ],
 )

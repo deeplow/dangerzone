@@ -16,7 +16,6 @@ pyxdg = {version = "*", platform = "linux"}
 [tool.poetry.scripts]
 dangerzone = 'dangerzone:main'
 dangerzone-container = 'dangerzone:main'
-dangerzone-cli = 'dangerzone:main'
 
 # Dependencies required for packaging the code on various platforms.
 [tool.poetry.group.package.dependencies]

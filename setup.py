@@ -49,7 +49,6 @@ It uses container technology to convert the documents within a secure sandbox.\
     entry_points={
         "console_scripts": [
             "dangerzone = dangerzone:main",
-            "dangerzone-cli = dangerzone:main",
         ]
     },
 )
