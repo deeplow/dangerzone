@@ -385,24 +385,24 @@ class DangerzoneConverter:
 
         self.update_progress("Converted document to pixels")
 
-        # Move converted files into /dangerzone
+        # Move converted files into /tmp/dangerzone
         for filename in (
             glob.glob("/tmp/page-*.rgb")
             + glob.glob("/tmp/page-*.width")
             + glob.glob("/tmp/page-*.height")
         ):
-            shutil.move(filename, "/dangerzone")
+            shutil.move(filename, "/tmp/dangerzone")
 
     async def pixels_to_pdf(self) -> None:
         self.percentage = 50.0
 
-        num_pages = len(glob.glob("/dangerzone/page-*.rgb"))
+        num_pages = len(glob.glob("/tmp/dangerzone/page-*.rgb"))
         total_size = 0.0
 
         # Convert RGB files to PDF files
         percentage_per_page = 45.0 / num_pages
         for page in range(1, num_pages + 1):
-            filename_base = f"/dangerzone/page-{page}"
+            filename_base = f"/tmp/dangerzone/page-{page}"
             rgb_filename = f"{filename_base}.rgb"
             width_filename = f"{filename_base}.width"
             height_filename = f"{filename_base}.height"
