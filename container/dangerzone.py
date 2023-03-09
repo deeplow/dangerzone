@@ -527,6 +527,7 @@ class DangerzoneConverter:
         shutil.move("/tmp/safe-output-compressed.pdf", "/safezone")
 
     def update_progress(self, text: str, *, error: bool = False) -> None:
+        return
         print(
             json.dumps(
                 {"error": error, "text": text, "percentage": int(self.percentage)}
