@@ -9,6 +9,7 @@ from . import args, errors
 from .document import ARCHIVE_SUBDIR, SAFE_EXTENSION
 from .isolation_provider.container import Container
 from .isolation_provider.dummy import Dummy
+from .isolation_provider.qubes import Qubes
 from .logic import DangerzoneCore
 from .util import get_version
 
@@ -64,7 +65,8 @@ def cli_main(
     if getattr(sys, "dangerzone_dev", False) and dummy_conversion:
         dangerzone = DangerzoneCore(Dummy())
     else:
-        dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
+        # dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
+        dangerzone = DangerzoneCore(Qubes())
 
     display_banner()
     if len(filenames) == 1 and output_filename:

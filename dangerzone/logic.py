@@ -69,8 +69,10 @@ class DangerzoneCore(object):
             )
 
         max_jobs = self.isolation_provider.get_max_parallel_conversions()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_jobs) as executor:
-            executor.map(convert_doc, self.documents)
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=max_jobs) as executor:
+        #    executor.map(convert_doc, self.documents)
+        for document in self.documents:
+            convert_doc(document)
 
     def get_unconverted_documents(self) -> List[Document]:
         return [doc for doc in self.documents if doc.is_unconverted()]
