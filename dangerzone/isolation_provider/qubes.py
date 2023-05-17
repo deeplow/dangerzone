@@ -102,7 +102,15 @@ class Qubes(IsolationProvider):
 
         # HACK file is symlinked
         converter = DangerzoneConverter()
-        asyncio.run(converter.pixels_to_pdf())  # TODO add progress updates on second stage
+        asyncio.run(
+            converter.pixels_to_pdf()
+        )  # TODO add progress updates on second stage
+
+        percentage = 100.0
+        text = "Safe PDF created"
+        self.print_progress(document, False, text, percentage)  # type: ignore [arg-type]
+        if stdout_callback:
+            stdout_callback(False, text, percentage)
 
         # FIXME remove once the OCR args are no longer passed with env vars
         os.environ.clear()
@@ -115,3 +123,8 @@ class Qubes(IsolationProvider):
 
     def get_max_parallel_conversions(self) -> int:
         return 1
+
+
+def running_on_qubes() -> bool:
+    # https://www.qubes-os.org/faq/#what-is-the-canonical-way-to-detect-qubes-vm
+    return os.path.exists("/usr/share/qubes/marker-vm")
