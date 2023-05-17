@@ -68,15 +68,15 @@ if __name__ == "__main__":
 
     ret_code = asyncio.run(main())
     num_pages = len(list(out_dir.glob("*.rgb")))
-    send_b(num_pages.to_bytes(2, byteorder='big', signed=False))
+    send_b(num_pages.to_bytes(2, byteorder="big", signed=False))
     for num_page in range(1, num_pages + 1):
         page_base = out_dir / f"page-{num_page}"
         with open(f"{page_base}.width", "r") as width_file:
             width = int(width_file.read())
         with open(f"{page_base}.height", "r") as height_file:
             height = int(height_file.read())
-        send_b(width.to_bytes(2, byteorder='big', signed=False))
-        send_b(height.to_bytes(2, byteorder='big', signed=False))
+        send_b(width.to_bytes(2, byteorder="big", signed=False))
+        send_b(height.to_bytes(2, byteorder="big", signed=False))
         with open(f"{page_base}.rgb", "rb") as rgb_file:
             rgb_data = rgb_file.read()
             send_b(rgb_data)

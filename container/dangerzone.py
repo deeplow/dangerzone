@@ -29,9 +29,11 @@ TIMEOUT_PER_PAGE: float = 30  # (seconds)
 TIMEOUT_PER_MB: float = 30  # (seconds)
 TIMEOUT_MIN: float = 60  # (seconds)
 
+
 def running_on_qubes() -> bool:
     # https://www.qubes-os.org/faq/#what-is-the-canonical-way-to-detect-qubes-vm
-    return os.path.exists('/usr/share/qubes/marker-vm')
+    return os.path.exists("/usr/share/qubes/marker-vm")
+
 
 async def read_stream(
     sr: asyncio.StreamReader, callback: Optional[Callable] = None
