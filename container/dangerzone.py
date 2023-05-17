@@ -29,6 +29,9 @@ TIMEOUT_PER_PAGE: float = 30  # (seconds)
 TIMEOUT_PER_MB: float = 30  # (seconds)
 TIMEOUT_MIN: float = 60  # (seconds)
 
+def running_on_qubes() -> bool:
+    # https://www.qubes-os.org/faq/#what-is-the-canonical-way-to-detect-qubes-vm
+    return os.path.exists('/usr/share/qubes/marker-vm')
 
 async def read_stream(
     sr: asyncio.StreamReader, callback: Optional[Callable] = None
@@ -523,8 +526,9 @@ class DangerzoneConverter:
         self.update_progress("Safe PDF created")
 
         # Move converted files into /safezone
-        shutil.move("/tmp/safe-output.pdf", "/safezone")
-        shutil.move("/tmp/safe-output-compressed.pdf", "/safezone")
+        if not running_on_qubes():
+            shutil.move("/tmp/safe-output.pdf", "/safezone")
+            shutil.move("/tmp/safe-output-compressed.pdf", "/safezone")
 
     def update_progress(self, text: str, *, error: bool = False) -> None:
         return
