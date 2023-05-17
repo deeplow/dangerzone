@@ -46,6 +46,8 @@ class Qubes(IsolationProvider):
         if os.path.exists(CONVERTED_FILE_PATH):
             os.remove(CONVERTED_FILE_PATH)
 
+        percentage = 0.0
+
         with open(document.input_filename, "rb") as f:
             # TODO handle lack of memory to start qube
             p = subprocess.Popen(
@@ -56,6 +58,10 @@ class Qubes(IsolationProvider):
             )
             untrusted_n_pages = p.stdout.read(2)
             n_pages = int.from_bytes(untrusted_n_pages, byteorder="big", signed=False)
+            if ocr_lang:
+                percentage_per_page = 50.0 / n_pages
+            else:
+                percentage_per_page = 100.0 / n_pages
             for page in range(1, n_pages + 1):
                 # TODO handle too width > MAX_PAGE_WIDTH
                 # TODO handle too big height > MAX_PAGE_HEIGHT
@@ -75,17 +81,28 @@ class Qubes(IsolationProvider):
                 with open(f"/tmp/dangerzone/page-{page}.rgb", "wb") as f:
                     f.write(untrusted_pixels)
 
-            # TODO handle leftover code input
+                percentage += percentage_per_page
+
+                text = f"Converting page {page}/{n_pages} to pixels"
+                self.print_progress(document, False, text, percentage)
+                if stdout_callback:
+                    stdout_callback(False, text, percentage)
+
+        # TODO handle leftover code input
+        text = "Converted document to pixels"
+        self.print_progress(document, False, text, percentage)  # type: ignore [arg-type]
+        if stdout_callback:
+            stdout_callback(False, text, percentage)
 
         # FIXME pass OCR stuff properly
         old_environ = dict(os.environ)
-        ocr = "1" if ocr_lang else "0"
-        os.environ["OCR"] = ocr
-        os.environ["OCR_LANGUAGE"] = ocr_lang
+        if ocr_lang:
+            os.environ["OCR"] = "1"
+            os.environ["OCR_LANGUAGE"] = ocr_lang
 
         # HACK file is symlinked
         converter = DangerzoneConverter()
-        asyncio.run(converter.pixels_to_pdf())
+        asyncio.run(converter.pixels_to_pdf())  # TODO add progress updates on second stage
 
         # FIXME remove once the OCR args are no longer passed with env vars
         os.environ.clear()
