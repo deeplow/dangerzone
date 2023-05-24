@@ -5,7 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from dangerzone import DangerzoneConverter
+from .doc_to_pixels import DocumentToPixels
 
 
 def recv_b():
@@ -41,10 +41,10 @@ def send(data):
 
 
 async def main() -> int:
-    converter = DangerzoneConverter()
+    converter = DocumentToPixels()
 
     try:
-        await converter.document_to_pixels()
+        await converter.convert()
     except (RuntimeError, TimeoutError, ValueError) as e:
         # converter.update_progress(str(e), error=True)
         return 1

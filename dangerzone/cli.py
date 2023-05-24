@@ -1,6 +1,7 @@
 import logging
 import sys
 from typing import Any, Callable, List, Optional, TypeVar
+import os
 
 import click
 from colorama import Back, Fore, Style
@@ -66,7 +67,7 @@ def cli_main(
         dangerzone = DangerzoneCore(Dummy())
     else:
         # dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
-        dangerzone = DangerzoneCore(Qubes())
+        dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
 
     display_banner()
     if len(filenames) == 1 and output_filename:

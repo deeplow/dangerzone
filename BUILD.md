@@ -102,11 +102,40 @@ Create a .rpm:
 ./install/linux/build-rpm.py
 ```
 
-## QubesOS
+## Qubes OS
 
-Create a Debian- or Fedora-based standalone VM with at least 8GB of private storage space, and follow the relevant instructions above.
+Create a Debian or Fedora-based development standalone qube with at least 8GB of private storage space, and follow the relevant instructions above for the respective template.
 
 Over time, you may need to increase disk space or prune outdated Docker images if you run into build issues on this VM.
+
+### Initial Setup
+
+In dom0 run:
+    `qvm-clone fedora-37 fedora-37-dz`
+1. Copy the built `.rpm` to the `fedora-37-dz` via qvm-copy
+2. Install the `.rpm` in the `fedora-37-dz` template by running:
+    `sudo dnf install ~/QubesIncoming/<DEV_QUBE_NAME>/dangerzone*.rpm`
+3. Create an disposable app qube (where the conversion will take place):
+    `qvm-create --class AppVM --label red --template fedora-37-dz --prop netvm="" --prop template_for_dispvms=True dz-dvm`
+4. Create a qube from to call the conversion:
+    `qvm-create --class AppVM --label red --template fedora-37-dz dz`
+5. In dom0 add the following RPC policy in the file `/etc/qubes/policy.d/50-dangerzone.policy`:
+    `dz.Convert      *       @anyvm          @dispvm:dz-dvm  allow`
+
+### Compiling and testing
+
+1. Ensure you are not on any python virtualenv (otherwise RPM installation will fail)
+2. Build the RPM package with the following command:
+    `./install/linux/build-rpm.py --qubes`
+3. Copy the built `dangerzone.rpm` to `fedora-37-dz`
+    `qvm-copy dist/dangerzone-0.4.1-1.noarch.rpm`
+
+Run on `fedora-37-dz`:
+1. `sudo dnf install -y ~/QubesIncoming/<DEV_VM>/dangerzone-*.rpm` (replace `<DEV_VM>`)
+2. Shut down the template `fedora-37-dz`
+
+Run `dangerzone-cli` on the `dz` qube (make sure you only start it after the template has shut down)
+
 
 ## macOS
 

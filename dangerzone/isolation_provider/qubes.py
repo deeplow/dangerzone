@@ -14,8 +14,8 @@ from .base import IsolationProvider
 
 log = logging.getLogger(__name__)
 
+from ..conversion.pixels_to_pdf import PixelsToPDF
 from ..util import get_subprocess_startupinfo, get_tmp_dir
-from .qubes_container_code_symlinked import DangerzoneConverter
 
 CONVERTED_FILE_PATH = (
     "/tmp/safe-output-compressed.pdf"  # FIXME won't work for parallel conversions
@@ -100,10 +100,8 @@ class Qubes(IsolationProvider):
             os.environ["OCR"] = "1"
             os.environ["OCR_LANGUAGE"] = ocr_lang
 
-        # HACK file is symlinked
-        converter = DangerzoneConverter()
         asyncio.run(
-            converter.pixels_to_pdf()
+            PixelsToPDF().convert()
         )  # TODO add progress updates on second stage
 
         percentage = 100.0

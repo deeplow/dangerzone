@@ -262,8 +262,7 @@ class Container(IsolationProvider):
         # Convert document to pixels
         command = [
             "/usr/bin/python3",
-            "/usr/local/bin/dangerzone.py",
-            "document-to-pixels",
+            "/usr/local/bin/doc_to_pixels.py",
         ]
         extra_args = [
             "-v",
@@ -282,8 +281,7 @@ class Container(IsolationProvider):
             # Convert pixels to safe PDF
             command = [
                 "/usr/bin/python3",
-                "/usr/local/bin/dangerzone.py",
-                "pixels-to-pdf",
+                "/usr/local/bin/pixels_to_pdf.py",
             ]
             extra_args = [
                 "-v",
