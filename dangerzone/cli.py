@@ -13,6 +13,7 @@ from .isolation_provider.dummy import Dummy
 from .isolation_provider.qubes import Qubes
 from .logic import DangerzoneCore
 from .util import get_version
+from .isolation_provider.qubes import running_on_qubes
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -65,8 +66,9 @@ def cli_main(
 
     if getattr(sys, "dangerzone_dev", False) and dummy_conversion:
         dangerzone = DangerzoneCore(Dummy())
+    elif running_on_qubes() and os.environ.get("DZ_USE_CONTAINERS","0") == "0":
+        dangerzone = DangerzoneCore(Qubes())
     else:
-        # dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
         dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
 
     display_banner()
