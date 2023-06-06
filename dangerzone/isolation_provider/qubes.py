@@ -101,8 +101,8 @@ class Qubes(IsolationProvider):
             untrusted_n_pages = p.stdout.read(2)
             n_pages = int.from_bytes(untrusted_n_pages, byteorder="big", signed=False)
             if n_pages == 0:
-                p.wait()
-                print(f"Command failed: {p}")
+                # FIXME: Fail loudly in that case
+                return False
             if ocr_lang:
                 percentage_per_page = 50.0 / n_pages
             else:

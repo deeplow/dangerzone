@@ -35,9 +35,8 @@ def main():
         sys.path.insert(0, t.name)
 
         import doc_to_pixels_qubes_wrapper
-        return doc_to_pixels_qubes_wrapper.main2()
+        return asyncio.run(doc_to_pixels_qubes_wrapper.main())
 
 
 if __name__ == "__main__":
     sys.exit(main())
-
