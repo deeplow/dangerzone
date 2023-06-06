@@ -4,6 +4,7 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from typing import Optional
 
 # FIXME: We have two cases here, to accommodate for the case of dz.ConvertDev, which
 # accepts a Python zipfile that cannot be used as a Python package. Merge them into one,
@@ -14,36 +15,24 @@ else:
     from doc_to_pixels import DocumentToPixels
 
 
-def recv_b():
-    """Qrexec wrapper for receiving binary data from the client
-
-    Borrowed from https://github.com/QubesOS/qubes-app-linux-pdf-converter/blob/main/qubespdfconverter/server.py#L82
-    """
-    untrusted_data = sys.stdin.buffer.read()
-    if not untrusted_data:
+def read_bytes() -> bytes:
+    """Read bytes from the stdin."""
+    data = sys.stdin.buffer.read()
+    if data is None:
         raise EOFError
-    return untrusted_data
+    return data
 
 
-def send_b(data):
-    """Qrexec wrapper for sending binary data to the client
-
-    Borrowed from https://github.com/QubesOS/qubes-app-linux-pdf-converter/blob/main/qubespdfconverter/server.py#L82
-
-    """
-    if isinstance(data, (str, int)):
-        data = str(data).encode()
-
-    sys.stdout.buffer.write(data)
-    sys.stdout.buffer.flush()
+def write_bytes(data: bytes, file=sys.stdout):
+    file.buffer.write(data)
 
 
-def send(data):
-    """Qrexec wrapper for sending text data to the client
+def write_text(text: str, file=sys.stdout):
+    write_bytes(text.encode(), file=file)
 
-    borrowed from https://github.com/QubesOS/qubes-app-linux-pdf-converter/blob/main/qubespdfconverter/server.py#L77
-    """
-    print(data, flush=True)
+
+def write_int(num: int, file=sys.stdout):
+    write_bytes(num.to_bytes(2, signed=False), file=file)
 
 
 async def main() -> int:
@@ -67,7 +56,7 @@ def main2() -> int:
     out_dir.mkdir()
 
     try:
-        untrusted_data = recv_b()
+        untrusted_data = read_bytes()
     except EOFError:
         sys.exit(1)
 
@@ -76,18 +65,18 @@ def main2() -> int:
 
     ret_code = asyncio.run(main())
     num_pages = len(list(out_dir.glob("*.rgb")))
-    send_b(num_pages.to_bytes(2, byteorder="big", signed=False))
+    write_int(num_pages)
     for num_page in range(1, num_pages + 1):
         page_base = out_dir / f"page-{num_page}"
         with open(f"{page_base}.width", "r") as width_file:
             width = int(width_file.read())
         with open(f"{page_base}.height", "r") as height_file:
             height = int(height_file.read())
-        send_b(width.to_bytes(2, byteorder="big", signed=False))
-        send_b(height.to_bytes(2, byteorder="big", signed=False))
+        write_int(width)
+        write_int(height)
         with open(f"{page_base}.rgb", "rb") as rgb_file:
             rgb_data = rgb_file.read()
-            send_b(rgb_data)
+            write_bytes(rgb_data)
 
     return ret_code
 
