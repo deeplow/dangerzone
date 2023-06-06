@@ -12,8 +12,8 @@ import glob
 import os
 import re
 import shutil
-from typing import Dict, Optional
 import sys
+from typing import Dict, Optional
 
 import magic
 

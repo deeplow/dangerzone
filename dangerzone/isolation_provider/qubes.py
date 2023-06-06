@@ -1,15 +1,15 @@
-import io
 import asyncio
+import glob
+import inspect
+import io
 import logging
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import zipfile
-import tempfile
-import glob
-import inspect
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -71,7 +71,6 @@ class Qubes(IsolationProvider):
                 with zipfile.PyZipFile(temp_file, "w") as z:
                     for py in pyfiles:
                         z.writepy(py)
-
 
                 p = subprocess.Popen(
                     ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.ConvertDev"],

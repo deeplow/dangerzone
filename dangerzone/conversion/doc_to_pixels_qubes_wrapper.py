@@ -14,7 +14,6 @@ else:
     from doc_to_pixels import DocumentToPixels
 
 
-
 def recv_b():
     """Qrexec wrapper for receiving binary data from the client
 

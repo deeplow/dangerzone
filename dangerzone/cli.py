@@ -1,7 +1,7 @@
 import logging
+import os
 import sys
 from typing import Any, Callable, List, Optional, TypeVar
-import os
 
 import click
 from colorama import Back, Fore, Style
@@ -10,10 +10,9 @@ from . import args, errors
 from .document import ARCHIVE_SUBDIR, SAFE_EXTENSION
 from .isolation_provider.container import Container
 from .isolation_provider.dummy import Dummy
-from .isolation_provider.qubes import Qubes
+from .isolation_provider.qubes import Qubes, running_on_qubes
 from .logic import DangerzoneCore
 from .util import get_version
-from .isolation_provider.qubes import running_on_qubes
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -66,7 +65,7 @@ def cli_main(
 
     if getattr(sys, "dangerzone_dev", False) and dummy_conversion:
         dangerzone = DangerzoneCore(Dummy())
-    elif running_on_qubes() and os.environ.get("DZ_USE_CONTAINERS","0") == "0":
+    elif running_on_qubes() and os.environ.get("DZ_USE_CONTAINERS", "0") == "0":
         dangerzone = DangerzoneCore(Qubes())
     else:
         dangerzone = DangerzoneCore(Container(enable_timeouts=enable_timeouts))
