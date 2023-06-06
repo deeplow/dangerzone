@@ -5,7 +5,14 @@ import sys
 import tempfile
 from pathlib import Path
 
-from .doc_to_pixels import DocumentToPixels
+# FIXME: We have two cases here, to accommodate for the case of dz.ConvertDev, which
+# accepts a Python zipfile that cannot be used as a Python package. Merge them into one,
+# if possible.
+if __name__ == "__main__":
+    from .doc_to_pixels import DocumentToPixels
+else:
+    from doc_to_pixels import DocumentToPixels
+
 
 
 def recv_b():
@@ -52,7 +59,9 @@ async def main() -> int:
         return 0  # Success!
 
 
-if __name__ == "__main__":
+# FIXME: Convert the following to asyncio code, so that there's no need to have a
+# separate function.
+def main2() -> int:
     out_dir = Path("/tmp/dangerzone")
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -81,4 +90,8 @@ if __name__ == "__main__":
             rgb_data = rgb_file.read()
             send_b(rgb_data)
 
-    sys.exit(ret_code)
+    return ret_code
+
+
+if __name__ == "__main__":
+    sys.exit(main2())

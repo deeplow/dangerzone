@@ -11,11 +11,12 @@ import json
 import os
 import shutil
 import sys
-try:
-    from .common import DangerzoneConverter, run_command
-except:
-    # Importing without a module is needed when this runs in a container
-    from common import DangerzoneConverter, run_command, running_on_qubes
+# try:
+#     from .common import DangerzoneConverter, run_command
+# except:
+#     # Importing without a module is needed when this runs in a container
+#     from common import DangerzoneConverter, run_command, running_on_qubes
+from .common import DangerzoneConverter, run_command, running_on_qubes
 
 
 class PixelsToPDF(DangerzoneConverter):

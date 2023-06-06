@@ -1,3 +1,4 @@
+import io
 import asyncio
 import logging
 import os
@@ -5,6 +6,10 @@ import shutil
 import subprocess
 import sys
 import time
+import zipfile
+import tempfile
+import glob
+import inspect
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -50,14 +55,54 @@ class Qubes(IsolationProvider):
 
         with open(document.input_filename, "rb") as f:
             # TODO handle lack of memory to start qube
-            p = subprocess.Popen(
-                ["/usr/bin/qrexec-client-vm", "@dispvm", "dz.Convert"],
-                stdin=f,
-                stdout=subprocess.PIPE,
-                startupinfo=get_subprocess_startupinfo(),
-            )
+            if sys.dangerzone_dev:
+                # Use dz.ConvertDev RPC call instead, if we are in development mode.
+                # Basically, the change is that we also transfer the necessary Python
+                # code as a zipfile, before sending the doc that the user requested.
+
+                # Grab the files of the conversion module.
+                import dangerzone as _dz
+                root_module = Path(inspect.getfile(_dz)).parent
+                temp_file = io.BytesIO()
+                pyfiles = glob.glob(root_module.name + "/conversion/*.py")
+
+                # Create a Python zipfile that contains all the files of the conversion
+                # module.
+                with zipfile.PyZipFile(temp_file, "w") as z:
+                    for py in pyfiles:
+                        z.writepy(py)
+
+
+                p = subprocess.Popen(
+                    ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.ConvertDev"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    startupinfo=get_subprocess_startupinfo(),
+                )
+
+                # Send the following data:
+                # 1. The size of the Python zipfile, so that the server can know when to
+                #    stop.
+                # 2. The Python zipfile itself.
+                # 3. The user's document.
+                bufsize_bytes = len(temp_file.getvalue()).to_bytes(2)
+                p.stdin.write(bufsize_bytes)
+                p.stdin.write(temp_file.getvalue())
+                p.stdin.write(f.read())
+                p.stdin.close()
+            else:
+                p = subprocess.Popen(
+                    ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.Convert"],
+                    stdin=f,
+                    stdout=subprocess.PIPE,
+                    startupinfo=get_subprocess_startupinfo(),
+                )
+
             untrusted_n_pages = p.stdout.read(2)
             n_pages = int.from_bytes(untrusted_n_pages, byteorder="big", signed=False)
+            if n_pages == 0:
+                p.wait()
+                print(f"Command failed: {p}")
             if ocr_lang:
                 percentage_per_page = 50.0 / n_pages
             else:

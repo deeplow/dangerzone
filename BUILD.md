@@ -136,6 +136,35 @@ Run on `fedora-37-dz`:
 
 Run `dangerzone-cli` on the `dz` qube (make sure you only start it after the template has shut down)
 
+## Initial Setup (apyrgio proposal)
+
+1. Clone the repo into an app qube of your choice.
+2. Go to the template of the app qube and install LibreOffice and python3-magic.
+3. Create a disposable template qube (`dz-dvm`) with no access to the Internet,
+   based on the same template as your App qube.
+5. In dom0 add the following RPC policy in the file `/etc/qubes/policy.d/50-dangerzone.policy`:
+
+   ```
+   dz.Convert      *       @anyvm          @dispvm:dz-dvm  allow
+   dz.ConvertDev      *       @anyvm       @dispvm:dz-dvm  allow
+   ```
+
+4. Copy the `./qubes/dz.ConvertDev` file into the
+   `/rw/usrlocal/etc/qubes-rpc/dz.ConvertDev` path of the disposable template
+   qube.
+5. Install Poetry and the project's packages.
+
+## Testing (apyrgio proposal)
+
+Testing can continue as usual. For changes in the server side components, you
+can simply edit them locally, and they will be mirrored to the disposable qube
+through the dz.ConvertDev RPC call.
+
+The only reason to update any template from there on is if:
+1. The project requires new server-side components. Update the base Fedora 37
+   template in that case.
+2. The code for dz.ConvertDev needs to be updated. Copy the updated file in the
+   `/rw/usrlocal/etc/qubes-rpc` path of the `dz-dvm` template in that case.
 
 ## macOS
 
