@@ -55,13 +55,14 @@ class Qubes(IsolationProvider):
 
         with open(document.input_filename, "rb") as f:
             # TODO handle lack of memory to start qube
-            if sys.dangerzone_dev:
+            if getattr(sys, "dangerzone_dev", False):
                 # Use dz.ConvertDev RPC call instead, if we are in development mode.
                 # Basically, the change is that we also transfer the necessary Python
                 # code as a zipfile, before sending the doc that the user requested.
 
                 # Grab the files of the conversion module.
                 import dangerzone as _dz
+
                 root_module = Path(inspect.getfile(_dz)).parent
                 temp_file = io.BytesIO()
                 pyfiles = glob.glob(root_module.name + "/conversion/*.py")
