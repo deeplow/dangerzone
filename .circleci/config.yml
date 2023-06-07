@@ -42,8 +42,16 @@ aliases:
       ./install/linux/build-rpm.py
       ls -lh dist/
 
+  - &calculate-cache-key
+    name: Caculating container cache key
+    command: |
+      mkdir -p /caches/
+      cd dangerzone/conversion/
+      cat common.py doc_to_pixels.py pixels_to_pdf.py | sha1sum | cut -d' ' -f1 > /caches/cache-id.txt
+      cd ../../
+
   - &restore-cache
-    key: v1-{{ checksum "container/Dockerfile" }}-{{ checksum "container/dangerzone.py" }}
+    key: v1-{{ checksum "Dockerfile" }}-{{ checksum "/caches/cache-id.txt" }}
     paths:
       - /caches/container.tar.gz
       - /caches/image-id.txt
@@ -85,9 +93,8 @@ jobs:
       - image: docker:dind
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-{{ checksum "container/Dockerfile" }}-{{ checksum "container/dangerzone.py" }}
+      - run: *calculate-cache-key
+      - restore_cache: *restore-cache
       - setup_remote_docker
       - run:
           name: Build Dangerzone image
@@ -108,8 +115,9 @@ jobs:
               gzip -f /caches/container.tar
               docker image ls dangerzone.rocks/dangerzone | grep "dangerzone.rocks/dangerzone" | tr -s ' ' | cut -d' ' -f3 > /caches/image-id.txt
             fi
+      - run: *calculate-cache-key
       - save_cache:
-          key: v1-{{ checksum "container/Dockerfile" }}-{{ checksum "container/dangerzone.py" }}
+          key: v1-{{ checksum "Dockerfile" }}-{{ checksum "/caches/cache-id.txt" }}
           paths:
             - /caches/container.tar.gz
             - /caches/image-id.txt
@@ -136,6 +144,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run:
@@ -155,6 +164,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -181,6 +191,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -207,6 +218,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -233,6 +245,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -259,6 +272,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -285,6 +299,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -328,6 +343,7 @@ jobs:
           command: |
             sudo mkdir -p /caches
             sudo chown -R $USER:$USER /caches
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
 
@@ -365,6 +381,7 @@ jobs:
     steps:
       - run: *install-dependencies-deb
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-deb
@@ -376,6 +393,7 @@ jobs:
     steps:
       - run: *install-dependencies-deb
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-deb
@@ -388,6 +406,7 @@ jobs:
       - run: *install-dependencies-deb
       - run: *install-python-all
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-deb
@@ -399,6 +418,7 @@ jobs:
     steps:
       - run: *install-dependencies-deb
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-deb
@@ -410,6 +430,7 @@ jobs:
     steps:
       - run: *install-dependencies-deb
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-deb
@@ -421,6 +442,7 @@ jobs:
     steps:
       - run: *install-dependencies-rpm
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-rpm
@@ -432,6 +454,7 @@ jobs:
     steps:
       - run: *install-dependencies-rpm
       - checkout
+      - run: *calculate-cache-key
       - restore_cache: *restore-cache
       - run: *copy-image
       - run: *build-rpm
