@@ -5,7 +5,7 @@ set -e
 TAG=dangerzone.rocks/dangerzone:latest
 
 echo "Building container image"
-docker build container --tag $TAG
+docker build . --tag $TAG
 
 echo "Saving and compressing container image"
 docker save $TAG | gzip > share/container.tar.gz

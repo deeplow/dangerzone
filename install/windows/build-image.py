@@ -9,7 +9,7 @@ def main():
         [
             "docker",
             "build",
-            "container",
+            ".",
             "--tag",
             "dangerzone.rocks/dangerzone:latest",
         ]
