@@ -34,12 +34,14 @@ def _write_text(text: str, file=sys.stdout):
 def _write_int(num: int, file=sys.stdout):
     _write_bytes(num.to_bytes(2, signed=False), file=file)
 
+
 # ==== ASYNC METHODS ====
 # We run sync methods in async wrappers, because pure async methods are more difficult:
 # https://stackoverflow.com/a/52702646
 #
 # In practice, because they are I/O bound and we don't have many running concurrently,
 # they shouldn't cause a problem.
+
 
 async def read_bytes() -> bytes:
     return await asyncio.to_thread(_read_bytes)
