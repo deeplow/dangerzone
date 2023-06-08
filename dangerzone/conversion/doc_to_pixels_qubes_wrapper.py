@@ -12,7 +12,7 @@ from typing import Optional
 if __name__ == "__main__":
     from .doc_to_pixels import DocumentToPixels
 else:
-    from doc_to_pixels import DocumentToPixels
+    from doc_to_pixels import DocumentToPixels  # type: ignore [no-redef]
 
 
 def _read_bytes() -> bytes:
@@ -23,15 +23,15 @@ def _read_bytes() -> bytes:
     return data
 
 
-def _write_bytes(data: bytes, file=sys.stdout):
+def _write_bytes(data: bytes, file=sys.stdout) -> None:
     file.buffer.write(data)
 
 
-def _write_text(text: str, file=sys.stdout):
+def _write_text(text: str, file=sys.stdout) -> None:
     _write_bytes(text.encode(), file=file)
 
 
-def _write_int(num: int, file=sys.stdout):
+def _write_int(num: int, file=sys.stdout) -> None:
     _write_bytes(num.to_bytes(2, signed=False), file=file)
 
 
@@ -47,15 +47,15 @@ async def read_bytes() -> bytes:
     return await asyncio.to_thread(_read_bytes)
 
 
-async def write_bytes(data: bytes, file=sys.stdout):
+async def write_bytes(data: bytes, file=sys.stdout) -> bytes:
     return await asyncio.to_thread(_write_bytes, data, file=file)
 
 
-async def write_text(text: str, file=sys.stdout):
+async def write_text(text: str, file=sys.stdout) -> str:
     return await asyncio.to_thread(_write_text, text, file=file)
 
 
-async def write_int(num: int, file=sys.stdout):
+async def write_int(num: int, file=sys.stdout) -> str:
     return await asyncio.to_thread(_write_int, num, file=file)
 
 

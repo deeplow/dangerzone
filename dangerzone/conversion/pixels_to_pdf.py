@@ -16,7 +16,9 @@ try:
     from .common import DangerzoneConverter, run_command, running_on_qubes
 except:
     # Importing without a module is needed when this runs in a container
-    from common import DangerzoneConverter, run_command, running_on_qubes
+    from common import DangerzoneConverter  # type: ignore [no-redef]
+    from common import run_command  # type: ignore [no-redef]
+    from common import running_on_qubes  # type: ignore [no-redef]
 
 
 class PixelsToPDF(DangerzoneConverter):

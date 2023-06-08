@@ -21,7 +21,8 @@ try:
     from .common import DangerzoneConverter, run_command
 except:
     # Importing without a module is needed when this runs in a container
-    from common import DangerzoneConverter, run_command
+    from common import DangerzoneConverter  # type: ignore [no-redef]
+    from common import run_command  # type: ignore [no-redef]
 
 
 class DocumentToPixels(DangerzoneConverter):

@@ -31,14 +31,14 @@ class Qubes(IsolationProvider):
     """Uses a disposable qube for performing the conversion"""
 
     def install(self) -> bool:
-        pass
+        return True
 
     def _convert(
         self,
         document: Document,
         ocr_lang: Optional[str],
         stdout_callback: Optional[Callable] = None,
-    ):
+    ) -> bool:
         success = False
 
         # FIXME won't work on windows, nor with multi-conversion
@@ -119,12 +119,12 @@ class Qubes(IsolationProvider):
                 )  # three color channels
 
                 # Wrapper code
-                with open(f"/tmp/dangerzone/page-{page}.width", "w") as f:
-                    f.write(str(width))
-                with open(f"/tmp/dangerzone/page-{page}.height", "w") as f:
-                    f.write(str(height))
-                with open(f"/tmp/dangerzone/page-{page}.rgb", "wb") as f:
-                    f.write(untrusted_pixels)
+                with open(f"/tmp/dangerzone/page-{page}.width", "w") as f_width:
+                    f_width.write(str(width))
+                with open(f"/tmp/dangerzone/page-{page}.height", "w") as f_height:
+                    f_height.write(str(height))
+                with open(f"/tmp/dangerzone/page-{page}.rgb", "wb") as f_rgb:
+                    f_rgb.write(untrusted_pixels)
 
                 percentage += percentage_per_page
 
@@ -135,7 +135,7 @@ class Qubes(IsolationProvider):
 
         # TODO handle leftover code input
         text = "Converted document to pixels"
-        self.print_progress(document, False, text, percentage)  # type: ignore [arg-type]
+        self.print_progress(document, False, text, percentage)
         if stdout_callback:
             stdout_callback(False, text, percentage)
 
@@ -151,7 +151,7 @@ class Qubes(IsolationProvider):
 
         percentage = 100.0
         text = "Safe PDF created"
-        self.print_progress(document, False, text, percentage)  # type: ignore [arg-type]
+        self.print_progress(document, False, text, percentage)
         if stdout_callback:
             stdout_callback(False, text, percentage)
 

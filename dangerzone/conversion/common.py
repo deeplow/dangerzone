@@ -127,7 +127,7 @@ class DangerzoneConverter:
         return timeout
 
     @abstractmethod
-    async def convert(self):
+    async def convert(self) -> None:
         pass
 
     def update_progress(self, text: str, *, error: bool = False) -> None:
