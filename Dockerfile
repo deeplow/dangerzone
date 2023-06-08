@@ -36,9 +36,6 @@ RUN mkdir tessdata && cd tessdata \
 COPY dangerzone/conversion/common.py /usr/local/bin/
 COPY dangerzone/conversion/pixels_to_pdf.py /usr/local/bin/
 COPY dangerzone/conversion/doc_to_pixels.py /usr/local/bin/
-RUN chmod +x /usr/local/bin/common.py
-RUN chmod +x /usr/local/bin/pixels_to_pdf.py
-RUN chmod +x /usr/local/bin/doc_to_pixels.py
 
 # Add the unprivileged user
 RUN adduser -s /bin/sh -D dangerzone
