@@ -131,10 +131,10 @@ class DangerzoneConverter:
         pass
 
     def update_progress(self, text: str, *, error: bool = False) -> None:
-        return
-        print(
-            json.dumps(
-                {"error": error, "text": text, "percentage": int(self.percentage)}
+        if not running_on_qubes():
+            print(
+                json.dumps(
+                    {"error": error, "text": text, "percentage": int(self.percentage)}
+                )
             )
-        )
-        sys.stdout.flush()
+            sys.stdout.flush()
