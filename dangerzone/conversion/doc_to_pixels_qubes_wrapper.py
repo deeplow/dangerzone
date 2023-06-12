@@ -59,8 +59,6 @@ async def write_int(num: int, file=sys.stdout) -> str:
     return await asyncio.to_thread(_write_int, num, file=file)
 
 
-# FIXME: Convert the following to asyncio code, so that there's no need to have a
-# separate function.
 async def main() -> int:
     out_dir = Path("/tmp/dangerzone")
     if out_dir.exists():
