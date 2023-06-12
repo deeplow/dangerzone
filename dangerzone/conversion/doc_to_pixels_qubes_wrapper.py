@@ -68,12 +68,12 @@ async def main() -> int:
     out_dir.mkdir()
 
     try:
-        untrusted_data = await read_bytes()
+        data = await read_bytes()
     except EOFError:
         sys.exit(1)
 
     with open("/tmp/input_file", "wb") as f:
-        f.write(untrusted_data)
+        f.write(data)
 
     converter = DocumentToPixels()
 
