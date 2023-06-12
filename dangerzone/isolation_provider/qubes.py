@@ -164,8 +164,3 @@ class Qubes(IsolationProvider):
 
     def get_max_parallel_conversions(self) -> int:
         return 1
-
-
-def running_on_qubes() -> bool:
-    # https://www.qubes-os.org/faq/#what-is-the-canonical-way-to-detect-qubes-vm
-    return os.path.exists("/usr/share/qubes/marker-vm")

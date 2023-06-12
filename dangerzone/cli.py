@@ -10,7 +10,8 @@ from . import args, errors
 from .document import ARCHIVE_SUBDIR, SAFE_EXTENSION
 from .isolation_provider.container import Container
 from .isolation_provider.dummy import Dummy
-from .isolation_provider.qubes import Qubes, running_on_qubes
+from .isolation_provider.qubes import Qubes
+from .conversion.common import running_on_qubes
 from .logic import DangerzoneCore
 from .util import get_version
 

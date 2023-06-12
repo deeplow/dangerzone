@@ -24,7 +24,8 @@ from .. import args, errors
 from ..document import Document
 from ..isolation_provider.container import Container
 from ..isolation_provider.dummy import Dummy
-from ..isolation_provider.qubes import Qubes, running_on_qubes
+from ..isolation_provider.qubes import Qubes
+from .conversion.common import running_on_qubes
 from ..util import get_resource_path, get_version
 from .logic import DangerzoneGui
 from .main_window import MainWindow
