@@ -33,9 +33,9 @@ RUN mkdir tessdata && cd tessdata \
     && find . -name '*.traineddata' -maxdepth 2 -exec cp {} /usr/share/tessdata \; \
     && cd .. && rm -r tessdata
 
-COPY dangerzone/conversion/common.py /usr/local/bin/
-COPY dangerzone/conversion/pixels_to_pdf.py /usr/local/bin/
-COPY dangerzone/conversion/doc_to_pixels.py /usr/local/bin/
+COPY conversion/common.py /usr/local/bin/
+COPY conversion/pixels_to_pdf.py /usr/local/bin/
+COPY conversion/doc_to_pixels.py /usr/local/bin/
 
 # Add the unprivileged user
 RUN adduser -s /bin/sh -D dangerzone

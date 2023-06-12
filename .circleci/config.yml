@@ -102,7 +102,9 @@ jobs:
             if [ -f "/caches/container.tar.gz" ]; then
               echo "Already cached, skipping"
             else
-              docker build . --cache-from=dangerzone.rocks/dangerzone --tag dangerzone.rocks/dangerzone
+              docker build dangerzone/ -f Dockerfile \
+              --cache-from=dangerzone.rocks/dangerzone \
+              --tag dangerzone.rocks/dangerzone
             fi
       - run:
           name: Save Dangerzone image and image-id.txt to cache
