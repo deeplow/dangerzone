@@ -77,7 +77,6 @@ class Qubes(IsolationProvider):
                     ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.ConvertDev"],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
-                    startupinfo=get_subprocess_startupinfo(),
                 )
 
                 # Send the following data:
@@ -95,7 +94,6 @@ class Qubes(IsolationProvider):
                     ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.Convert"],
                     stdin=f,
                     stdout=subprocess.PIPE,
-                    startupinfo=get_subprocess_startupinfo(),
                 )
 
             untrusted_n_pages = p.stdout.read(2)
