@@ -152,7 +152,13 @@ Run `dangerzone-cli` on the `dz` qube (make sure you only start it after the tem
 4. Copy the `./qubes/dz.ConvertDev` file into the
    `/rw/usrlocal/etc/qubes-rpc/dz.ConvertDev` path of the disposable template
    qube.
-5. Install Poetry and the project's packages.
+5. Make the RPC action executable:
+
+   ```
+   sudo chmod +x /rw/usrlocal/etc/qubes-rpc/dz.ConvertDev
+   ```
+
+6. Install Poetry and the project's packages.
 
 ## Testing (apyrgio proposal)
 
