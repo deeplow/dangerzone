@@ -75,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif isinstance(self.dangerzone.isolation_provider, Dummy) or isinstance(
             self.dangerzone.isolation_provider, Qubes
         ):
-            # Don't wait with dummy converter
+            # Don't wait with dummy converter and on Qubes.
             self.waiting_widget = WaitingWidget()
             self.dangerzone.is_waiting_finished = True
 
