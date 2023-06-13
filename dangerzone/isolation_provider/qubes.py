@@ -11,7 +11,7 @@ import tempfile
 import time
 import zipfile
 from pathlib import Path
-from typing import Callable, Optional
+from typing import IO, BinaryIO, Callable, Optional
 
 from ..document import Document
 from ..util import get_resource_path
@@ -56,39 +56,12 @@ class Qubes(IsolationProvider):
         with open(document.input_filename, "rb") as f:
             # TODO handle lack of memory to start qube
             if getattr(sys, "dangerzone_dev", False):
-                # Use dz.ConvertDev RPC call instead, if we are in development mode.
-                # Basically, the change is that we also transfer the necessary Python
-                # code as a zipfile, before sending the doc that the user requested.
-
-                # Grab the files of the conversion module.
-                import dangerzone as _dz
-
-                root_module = Path(inspect.getfile(_dz)).parent
-                temp_file = io.BytesIO()
-                pyfiles = glob.glob(root_module.name + "/conversion/*.py")
-
-                # Create a Python zipfile that contains all the files of the conversion
-                # module.
-                with zipfile.PyZipFile(temp_file, "w") as z:
-                    for py in pyfiles:
-                        z.writepy(py)
-
+                wrapped_f = self.prepend_container_code(f)
                 p = subprocess.Popen(
                     ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.ConvertDev"],
-                    stdin=subprocess.PIPE,
+                    stdin=wrapped_f,
                     stdout=subprocess.PIPE,
                 )
-
-                # Send the following data:
-                # 1. The size of the Python zipfile, so that the server can know when to
-                #    stop.
-                # 2. The Python zipfile itself.
-                # 3. The user's document.
-                bufsize_bytes = len(temp_file.getvalue()).to_bytes(2)
-                p.stdin.write(bufsize_bytes)
-                p.stdin.write(temp_file.getvalue())
-                p.stdin.write(f.read())
-                p.stdin.close()
             else:
                 p = subprocess.Popen(
                     ["/usr/bin/qrexec-client-vm", "@dispvm:dz-dvm", "dz.Convert"],
@@ -164,3 +137,37 @@ class Qubes(IsolationProvider):
 
     def get_max_parallel_conversions(self) -> int:
         return 1
+
+    def prepend_container_code(self, input_file: BinaryIO) -> IO[bytes]:
+        """
+        Use dz.ConvertDev RPC call instead, if we are in development mode.
+        Basically, the change is that we also transfer the necessary Python
+        code as a zipfile, before sending the doc that the user requested.
+        """
+
+        # Grab the files of the conversion module.
+        import dangerzone as _dz
+
+        root_module = Path(inspect.getfile(_dz)).parent
+        wrapped_input_file = tempfile.TemporaryFile()
+        pyfiles = glob.glob(root_module.name + "/conversion/*.py")
+
+        with tempfile.TemporaryFile() as zip_f:
+            # Create a Python zipfile that contains all the files of the conversion
+            # module.
+            with zipfile.PyZipFile(zip_f, "w") as z:
+                for py in pyfiles:
+                    z.writepy(py)
+
+            # Send the following data:
+            # 1. The size of the Python zipfile, so that the server can know when to
+            #    stop.
+            # 2. The Python zipfile itself.
+            # 3. The user's document.
+            wrapped_input_file.write(zip_f.tell().to_bytes(2))
+            zip_f.seek(0)  # Rewind file for reading from beginning
+            wrapped_input_file.write(zip_f.read())
+            wrapped_input_file.write(input_file.read())
+
+        wrapped_input_file.seek(0)  # Rewind file for reading from beginning
+        return wrapped_input_file
