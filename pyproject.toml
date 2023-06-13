@@ -12,7 +12,6 @@ appdirs = "*"
 PySide6 = "^6.4.1"
 colorama = "*"
 pyxdg = {version = "*", platform = "linux"}
-python-magic = "^0.4.27"
 
 [tool.poetry.scripts]
 dangerzone = 'dangerzone:main'
