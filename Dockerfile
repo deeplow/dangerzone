@@ -34,16 +34,13 @@ RUN mkdir tessdata && cd tessdata \
     && find . -name '*.traineddata' -maxdepth 2 -exec cp {} /usr/share/tessdata \; \
     && cd .. && rm -r tessdata
 
-RUN mkdir h2orestart && cd h2orestart \
+RUN mkdir /libreoffice_ext && cd libreoffice_ext \
     && H2ORESTART_FILENAME=h2orestart.oxt \
     && H2ORESTART_VERSION=$(wget -O- -nv https://api.github.com/repos/ebandal/H2Orestart/releases/latest \
         | sed -n 's/^.*"tag_name": "\([v0-9.]\+\)".*$/\1/p') \
     && wget https://github.com/ebandal/H2Orestart/releases/download/$H2ORESTART_VERSION/$H2ORESTART_FILENAME \
     && echo "$H2ORESTART_CHECKSUM  $H2ORESTART_FILENAME" | sha256sum -c \
-    && _DESTDIR="/usr/lib/libreoffice/share/extensions/h2orestart/" \
-    && install -dm755 $_DESTDIR \
-    && unzip $H2ORESTART_FILENAME -d $_DESTDIR \
-    && cd .. && rm -r h2orestart
+    && install -dm777 "/usr/lib/libreoffice/share/extensions/"
 
 ENV PYTHONPATH=/opt/dangerzone
 
