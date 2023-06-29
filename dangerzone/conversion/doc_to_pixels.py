@@ -80,24 +80,29 @@ class DocumentToPixels(DangerzoneConverter):
             # .hwp
             "application/vnd.hancom.hwp": {
                 "type": "libreoffice",
-                "libreoffice_ext": "h2orestart.oxt"
+                "libreoffice_ext": "h2orestart.oxt",
+                "override_file_ext": ".hwp"
             },
             "application/haansofthwp": {
                 "type": "libreoffice",
-                "libreoffice_ext": "h2orestart.oxt"
+                "libreoffice_ext": "h2orestart.oxt",
+                "override_file_ext": ".hwp"
             },
             "application/x-hwp": {
                 "type": "libreoffice",
-                "libreoffice_ext": "h2orestart.oxt"
+                "libreoffice_ext": "h2orestart.oxt",
+                "override_file_ext": ".hwp"
             },
             # .hwpx
             "application/vnd.hancom.hwpx": {
                 "type": "libreoffice",
-                "libreoffice_ext": "h2orestart.oxt"
+                "libreoffice_ext": "h2orestart.oxt",
+                "override_file_ext": ".hwpx"
             },
             "application/haansofthwpx": {
                 "type": "libreoffice",
-                "libreoffice_ext": "h2orestart.oxt"
+                "libreoffice_ext": "h2orestart.oxt",
+                "override_file_ext": ".hwpx"
             },
             # At least .odt, .docx, .odg, .odp, .ods, and .pptx
             "application/zip": {
@@ -122,19 +127,21 @@ class DocumentToPixels(DangerzoneConverter):
             "image/x-tiff": {"type": "convert"},
         }
 
+        input_file_path = "/tmp/input_file"
+
         # Detect MIME type
         try:
             mime = magic.Magic(mime=True)
-            mime_type = mime.from_file("/tmp/input_file")
+            mime_type = mime.from_file(input_file_path)
         except TypeError:
-            mime_type = magic.detect_from_filename("/tmp/input_file").mime_type
+            mime_type = magic.detect_from_filename(input_file_path).mime_type
 
         # Validate MIME type
         if mime_type not in conversions:
             raise ValueError("The document format is not supported")
 
         # Get file size (in MiB)
-        size = os.path.getsize("/tmp/input_file") / 1024**2
+        size = os.path.getsize(input_file_path) / 1024**2
 
         # Calculate timeout for the first few file operations. The difference with the
         # subsequent ones is that we don't know the number of pages, before we have a
@@ -144,11 +151,19 @@ class DocumentToPixels(DangerzoneConverter):
         # Convert input document to PDF
         conversion = conversions[mime_type]
         if conversion["type"] is None:
-            pdf_filename = "/tmp/input_file"
+            pdf_filename = input_file_path
         elif conversion["type"] == "libreoffice":
+            # XXX Dynamically load libreoffice extensions as needed
             libreoffice_ext = conversion.get("libreoffice_ext", None)
             if libreoffice_ext:
                 await self.install_libreoffice_ext(libreoffice_ext)
+
+            # Override file extension from mime type when LibreOffice can't guess
+            # https://github.com/freedomofpress/dangerzone/pull/460#issuecomment-1611757116
+            override_file_ext = conversion.get("override_file_ext", "")
+            if override_file_ext:
+                shutil.copy(input_file_path, f"{input_file_path}{override_file_ext}")
+
             self.update_progress("Converting to PDF using LibreOffice")
             args = [
                 "libreoffice",
@@ -158,7 +173,7 @@ class DocumentToPixels(DangerzoneConverter):
                 "pdf",
                 "--outdir",
                 "/tmp",
-                "/tmp/input_file",
+                f"{input_file_path}{override_file_ext}",
             ]
             await run_command(
                 args,
@@ -169,14 +184,14 @@ class DocumentToPixels(DangerzoneConverter):
                 ),
                 timeout=timeout,
             )
-            pdf_filename = "/tmp/input_file.pdf"
+            pdf_filename = f"{input_file_path}.pdf"
         elif conversion["type"] == "convert":
             self.update_progress("Converting to PDF using GraphicsMagick")
             args = [
                 "gm",
                 "convert",
-                "/tmp/input_file",
-                "/tmp/input_file.pdf",
+                input_file_path,
+                f"{input_file_path}.pdf",
             ]
             await run_command(
                 args,
@@ -187,7 +202,7 @@ class DocumentToPixels(DangerzoneConverter):
                 ),
                 timeout=timeout,
             )
-            pdf_filename = "/tmp/input_file.pdf"
+            pdf_filename = f"{input_file_path}.pdf"
         else:
             raise ValueError(
                 f"Invalid conversion type {conversion['type']} for MIME type {mime_type}"
@@ -195,7 +210,7 @@ class DocumentToPixels(DangerzoneConverter):
         self.percentage += 3
 
         # Obtain number of pages
-        self.update_progress("Calculating number of pages")
+        self.update_progress(f"Calculating number of pages")
         stdout, _ = await run_command(
             ["pdfinfo", pdf_filename],
             error_message="PDF file is corrupted",
